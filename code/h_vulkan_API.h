@@ -227,3 +227,39 @@ void vk_destory_renderpass(vk_context* context, vk_renderpass* rederpass);
 
 void vk_renderpass_begin(vk_cmdbuffer* cmdbuffer,vk_renderpass* renderpass,VkFramebuffer frame_buffer);
 
+void vk_renderpass_end(vk_cmdbuffer* cmdbuffer, vk_renderpass* renderpass);
+
+void vk_cmdbuffer_allocate(
+	vk_context* context,
+	VkCommandPool pool,
+	bool is_primary,
+	vk_cmdbuffer* cmdbuffer);
+
+void vk_cmdbuffer_free(
+	vk_context* context,
+	VkCommandPool pool,
+	vk_cmdbuffer* cmdbuffer);
+
+void vk_cmdbuffer_begin(
+	vk_cmdbuffer* cmdbuffer,
+	bool is_single_use,
+	bool is_renderpass_continue_use,
+	bool is_simultaneous_use);
+
+void vk_cmdbuffer_end(vk_cmdbuffer* cmdbuffer);
+void vk_cmdbuffer_update_submitted(vk_cmdbuffer* cmdbuffer);
+void vk_cmdbuffer_reset(vk_cmdbuffer* cmdbuffer);
+
+void vk_cmdbuffer_allocate_and_begin_single_use(
+	vk_context* context,
+	VkCommandPool pool,
+	vk_cmdbuffer* cmdbuffer);
+
+
+void vk_cmdbuffer_free_and_end_single_use(
+	vk_context* context,
+	VkCommandPool pool,
+	vk_cmdbuffer* cmdbuffer,
+	VkQueue queue);
+
+
