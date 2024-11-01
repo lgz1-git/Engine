@@ -23,7 +23,25 @@ struct vk_select_queuefamily
 	u32 transfer_family_index;
 };
 
+enum vk_renderpass_state {
+	//todo:fill this structure
+	READY,
+	RECORDING,
+	IN_RENDER_PASS,
+	RECORDING_ENDED,
+	SUBMITTED,
+	NOT_ALLOCATED
+};
 
+enum vk_cmdbuffer_state {
+	//todo:fill this
+	CMD_READY,
+	CMD_RECORDING,
+	CMD_IN_RENDER_PASS,
+	CMD_RECORDING_ENDED,
+	CMD_SUBMITTED,
+	CMD_NOT_ALLOCATED
+};
 struct vk_pdevice_queue_requirements
 {
 	//queue requirements
@@ -62,6 +80,13 @@ struct vk_device
 };
 
 
+struct vk_depth_image {
+	VkImage image_handle;
+	VkDeviceMemory memory;
+	VkImageView view;
+	u32 w;
+	u32 h;
+};
 struct vk_swapchain_info
 {
 	VkSurfaceFormatKHR surface_format;
@@ -71,16 +96,26 @@ struct vk_swapchain_info
 	//TODO::clean up
 	VkImage* images;
 	VkImageView* views;
+
+	vk_depth_image depth_image;
 };
 
-struct vk_image {
-	VkImage iamge_handle;
-	VkDeviceMemory memory;
-	VkImageView view;
-	u32 w;
-	u32 h;
+struct vk_renderpass {
+	VkRenderPass renderpass_handle;
+	f32 x, y, w, h;
+	f32 r, g, b, a;
+
+	f32 depth;
+	u32 stencil;
+
+	vk_renderpass_state state;
 };
 
+struct vk_cmdbuffer {
+	VkCommandBuffer cmdbuffer_handle;
+
+	vk_cmdbuffer_state cmdbuffer_state;
+};
 struct vk_context
 {
 
@@ -91,6 +126,8 @@ struct vk_context
 	VkSurfaceKHR vk_surface;
 
 	vk_device device;
+
+	vk_renderpass main_renderpass;
 
 	std::vector<const char* > instance_extensions;
 	std::vector<const char* > instance_layers_extensions;
@@ -144,10 +181,17 @@ void vk_create_image(
 	u32 h,
 	VkFormat format,
 	VkImageTiling tiling,
-	VkImageUsageFlagBits memory_flags,
+	VkImageUsageFlagBits usage,
+	VkMemoryPropertyFlags memory_flags,
 	bool create_view,
 	VkImageAspectFlags view_aspect_flags,
-	vk_image* image);
+	vk_depth_image* image);
+
+void vk_create_image_view(
+	vk_context* context,
+	VkFormat format,
+	vk_depth_image* image,
+	VkImageAspectFlags aepect_flag);
 
 void vk_recreate_swapchain(vk_context* context,vk_swapchain_info* swapchain_info,u32 w,u32 h);
 
@@ -171,4 +215,15 @@ void vk_swapchain_present(
 	VkSemaphore render_complete_semaphore,
 	u32 present_image_index);
 
+
+void vk_create_renderpass(
+	vk_context* context,
+	vk_renderpass* renderpass,
+	f32 x, f32 y, f32 w, f32 h,
+	f32 r, f32 g, f32 b, f32 a,
+	f32 depth, u32 stencil);
+
+void vk_destory_renderpass(vk_context* context, vk_renderpass* rederpass);
+
+void vk_renderpass_begin(vk_cmdbuffer* cmdbuffer,vk_renderpass* renderpass,VkFramebuffer frame_buffer);
 

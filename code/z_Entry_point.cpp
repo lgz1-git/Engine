@@ -22,5 +22,12 @@ int main()
 	}
 	vk_create_device(&vk_context);
 	vk_create_swapchain(&vk_context, &vk_context.swapchain_info, 200, 200);
+	vk_create_renderpass(
+		&vk_context,
+		&vk_context.main_renderpass,
+		0, 0, vk_context.frame_buffer_w, vk_context.frame_buffer_h,
+		0.f, 0.f, 0.2f, 1.0f,
+		1.f,
+		0);
 	show_window(&win32_context);
 }

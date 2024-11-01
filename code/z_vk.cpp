@@ -100,6 +100,7 @@ CreateSwapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u
 	}
 
 	//views
+	swapchain_info->views = (VkImageView*)alloca(swapchain_info->image_counts * sizeof(VkImageView));
 	for (u32 i = 0; i < swapchain_info->image_counts; ++i) {
 		VkImageViewCreateInfo view_info = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
 		view_info.image = swapchain_info->images[i];
@@ -118,6 +119,19 @@ CreateSwapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u
 		//TODO::log
 		std::cout << "not support depth format" << std::endl;
 	}
+
+	vk_create_image(
+		context,
+		VK_IMAGE_TYPE_2D,
+		extent.width,
+		extent.height,
+		context->device.depth_format,
+		VK_IMAGE_TILING_OPTIMAL,
+		VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		true,
+		VK_IMAGE_ASPECT_DEPTH_BIT,
+		&swapchain_info->depth_image);
 }
 
 static void
@@ -420,13 +434,84 @@ void vk_create_image(
 	u32 h,
 	VkFormat format,
 	VkImageTiling tiling,
-	VkImageUsageFlagBits memory_flags,
+	VkImageUsageFlagBits usage,
+	VkMemoryPropertyFlags memory_flags,
 	bool create_view,
 	VkImageAspectFlags view_aspect_flags,
-	vk_image* image)
+	vk_depth_image* depth_image)
 {
+	depth_image->w = w;
+	depth_image->h = h;
+
+	VkImageCreateInfo create_info = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
+	create_info.arrayLayers = 1;
+	create_info.extent.width = w;
+	create_info.extent.height = h;
+	create_info.extent.depth = 1;//TODO
+	create_info.imageType = VK_IMAGE_TYPE_2D;
+	create_info.format = format;
+	create_info.tiling = tiling;
+	create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	create_info.usage = usage;
+	create_info.samples = VK_SAMPLE_COUNT_1_BIT;
+	create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	create_info.mipLevels = 4;
+
+	vk_assert(vkCreateImage(context->device.logical_device, &create_info, context->vk_allocator, &depth_image->image_handle));
+
+	VkMemoryRequirements memory_requirements;
+	vkGetImageMemoryRequirements(context->device.logical_device, depth_image->image_handle, &memory_requirements);
+
+	//Query memory requirements.
+	VkPhysicalDeviceMemoryProperties memory_properties;
+	i32 memory_typeindex = 0;
+	vkGetPhysicalDeviceMemoryProperties(context->device.physical_device, &memory_properties);
+	for (int i = 0; i < memory_properties.memoryTypeCount; i++) {
+		if (memory_requirements.memoryTypeBits & (1 << i) && (memory_properties.memoryTypes[i].propertyFlags & memory_flags) == memory_flags) {
+			memory_typeindex = i;
+			break;
+		}
+		memory_typeindex = -1;
+	}
+	// Allocate memory
+	if (memory_typeindex == -1)
+	{
+		//TODO::log
+		std::cout << "no memoty type for image\n";
+	}
+	VkMemoryAllocateInfo memory_allocate_info = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO }; 
+	memory_allocate_info.allocationSize  = memory_requirements.size;
+	memory_allocate_info.memoryTypeIndex = memory_typeindex;
+
+	vk_assert(vkAllocateMemory(context->device.logical_device, &memory_allocate_info, context->vk_allocator, &depth_image->memory)); 
+
+	// Bind the memory
+	vk_assert(vkBindImageMemory(context->device.logical_device, depth_image->image_handle, depth_image->memory, 0));
+	// TODO: configurable memory offset.
+
+	if (create_view) {
+		depth_image->view = 0;
+		vk_create_image_view(context, format, depth_image, view_aspect_flags);
+	}
+
+}
 
 
+void vk_create_image_view(
+	vk_context* context,
+	VkFormat format,
+	vk_depth_image* image,
+	VkImageAspectFlags aspect_flag)
+{
+	VkImageViewCreateInfo view_create_info = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO }; 
+	view_create_info.image = image->image_handle;
+	view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;         // TODO: Make configurable. view_create_info.format = format;
+	view_create_info.subresourceRange.aspectMask = aspect_flag;//-TODO:-Make configurable
+	view_create_info.subresourceRange.baseMipLevel = 0; 
+	view_create_info.subresourceRange.levelCount = 1; 
+	view_create_info.subresourceRange.baseArrayLayer = 0;
+	view_create_info.subresourceRange.layerCount = 1;
+	vk_assert(vkCreateImageView(context->device.logical_device, &view_create_info, context->vk_allocator, &image->view));
 }
 
 
@@ -547,3 +632,129 @@ void vk_swapchain_present(
 		std::cout << "fail to present iamges\n";
 	}
 }
+
+
+
+void vk_create_renderpass(
+	vk_context* context,
+	vk_renderpass* renderpass,
+	f32 x, f32 y, f32 w, f32 h,
+	f32 r, f32 g, f32 b, f32 a,
+	f32 depth, u32 stencil)
+
+{
+	VkSubpassDescription subpass = {};
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+
+	const u32 count = 2;
+	VkAttachmentDescription attachments_description[count] = {};
+
+	VkAttachmentDescription color_attachment;
+	color_attachment.format = context->swapchain_info.surface_format.format;//todo :: config
+	color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	color_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	color_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	color_attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	color_attachment.flags = 0;
+
+	attachments_description[0] = color_attachment;
+
+	VkAttachmentReference color_attachment_ref;
+	color_attachment_ref.attachment = 0;
+	color_attachment_ref.layout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+
+
+	//depth_attachment
+	VkAttachmentDescription depth_attachment = {};
+	depth_attachment.format = context->device.depth_format;
+	depth_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	depth_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	depth_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	depth_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	depth_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	depth_attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+	attachments_description[1] = depth_attachment;
+
+	VkAttachmentReference depth_attachment_ref;
+	depth_attachment_ref.attachment = 1;
+	depth_attachment_ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+	//attach to subpass
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &color_attachment_ref;
+	subpass.pDepthStencilAttachment = &depth_attachment_ref;
+
+	//shader
+	subpass.inputAttachmentCount = 0;
+	subpass.pInputAttachments = 0;
+
+	//multisampling colour attachments
+	subpass.pResolveAttachments = 0;
+
+	// Attachments not used in this subpass, but must be preserved for the next.
+	subpass.preserveAttachmentCount = 0;
+	subpass.pPreserveAttachments = 0;
+
+	// Render pass dependencies. TODO: make this configurable.
+	VkSubpassDependency dependency;
+	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependency.dstSubpass = 0;
+	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.srcAccessMask = 0;
+	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	dependency.dependencyFlags = 0;
+
+	VkRenderPassCreateInfo create_info = { VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
+	// xenaer pass create.
+	create_info.attachmentCount = count;
+	create_info.pAttachments = attachments_description;
+	create_info.subpassCount = 1;
+	create_info.pSubpasses = &subpass;
+	create_info.dependencyCount = 1;
+	create_info.pDependencies = &dependency;
+	create_info.pNext = 0;
+	create_info.flags = 0;
+
+	vk_assert(vkCreateRenderPass(context->device.logical_device, &create_info, context->vk_allocator, &renderpass->renderpass_handle));
+}
+
+
+
+void vk_renderpass_begin(vk_cmdbuffer* cmdbuffer, vk_renderpass* renderpass, VkFramebuffer frame_buffer)
+{
+	VkRenderPassBeginInfo begin_info = {VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
+	begin_info.renderPass = renderpass->renderpass_handle;
+	begin_info.framebuffer = frame_buffer;
+	begin_info.renderArea.extent.width = renderpass->w;
+	begin_info.renderArea.extent.height = renderpass->h;
+	begin_info.renderArea.offset.x = renderpass->x;
+	begin_info.renderArea.offset.y = renderpass->y;
+
+	VkClearValue clear_value[2];
+	clear_value[0].color.float32[0] = renderpass->r;
+	clear_value[0].color.float32[1] = renderpass->g;
+	clear_value[0].color.float32[2] = renderpass->b;
+	clear_value[0].color.float32[3] = renderpass->a;
+	clear_value[1].depthStencil.depth = renderpass->depth;
+	clear_value[1].depthStencil.stencil= renderpass->stencil;
+
+	begin_info.clearValueCount = 2;
+	begin_info.pClearValues = clear_value;
+
+	vkCmdBeginRenderPass(cmdbuffer->cmdbuffer_handle, &begin_info, VK_SUBPASS_CONTENTS_INLINE);
+	cmdbuffer->cmdbuffer_state = CMD_IN_RENDER_PASS;
+}
+
+void vk_renderpass_end(vk_cmdbuffer* cmdbuffer,vk_renderpass* renderpass)
+{
+	vkCmdEndRenderPass(cmdbuffer->cmdbuffer_handle);
+	cmdbuffer->cmdbuffer_state = CMD_RECORDING;
+
+}
+
