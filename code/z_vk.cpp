@@ -154,7 +154,7 @@ void vk_init_extensions(vk_context* context)
 
 	context->device_extensions.reserve(3);
 	context->device_extensions.emplace_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-
+	context->device_extensions.emplace_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 	context->device_layers_extensions.reserve(3);
 }
 
@@ -466,6 +466,7 @@ void vk_create_image(
 	VkPhysicalDeviceMemoryProperties memory_properties;
 	i32 memory_typeindex = 0;
 	vkGetPhysicalDeviceMemoryProperties(context->device.physical_device, &memory_properties);
+	//info:why is this?
 	for (int i = 0; i < memory_properties.memoryTypeCount; i++) {
 		if (memory_requirements.memoryTypeBits & (1 << i) && (memory_properties.memoryTypes[i].propertyFlags & memory_flags) == memory_flags) {
 			memory_typeindex = i;
@@ -511,6 +512,7 @@ void vk_create_image_view(
 	view_create_info.subresourceRange.levelCount = 1; 
 	view_create_info.subresourceRange.baseArrayLayer = 0;
 	view_create_info.subresourceRange.layerCount = 1;
+	view_create_info.format = format;
 	vk_assert(vkCreateImageView(context->device.logical_device, &view_create_info, context->vk_allocator, &image->view));
 }
 
@@ -551,6 +553,11 @@ void vk_create_device(vk_context* context)
 	vkGetDeviceQueue(context->device.logical_device, context->device.queue_family_info.graphics_family_index, 0, &context->device.graphics_queue);
 	vkGetDeviceQueue(context->device.logical_device, context->device.queue_family_info.graphics_family_index, 0, &context->device.present_queue);
 	vkGetDeviceQueue(context->device.logical_device, context->device.queue_family_info.present_family_index, 0, &context->device.transfer_queue);
+
+	VkCommandPoolCreateInfo pool_create = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
+	pool_create.queueFamilyIndex = context->device.queue_family_info.graphics_family_index;
+	pool_create.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	vkCreateCommandPool(context->device.logical_device, &pool_create,context->vk_allocator, &context->device.g_cmdpool);
 }
 
 
@@ -645,11 +652,12 @@ void vk_create_renderpass(
 {
 	VkSubpassDescription subpass = {};
 	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	
 
 	const u32 count = 2;
 	VkAttachmentDescription attachments_description[count] = {};
 
-	VkAttachmentDescription color_attachment;
+	VkAttachmentDescription color_attachment = {};
 	color_attachment.format = context->swapchain_info.surface_format.format;//todo :: config
 	color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
 	color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -662,9 +670,9 @@ void vk_create_renderpass(
 
 	attachments_description[0] = color_attachment;
 
-	VkAttachmentReference color_attachment_ref;
+	VkAttachmentReference color_attachment_ref = {};
 	color_attachment_ref.attachment = 0;
-	color_attachment_ref.layout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+	color_attachment_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 
 	//depth_attachment
@@ -680,7 +688,7 @@ void vk_create_renderpass(
 
 	attachments_description[1] = depth_attachment;
 
-	VkAttachmentReference depth_attachment_ref;
+	VkAttachmentReference depth_attachment_ref = {};
 	depth_attachment_ref.attachment = 1;
 	depth_attachment_ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
@@ -720,6 +728,7 @@ void vk_create_renderpass(
 	create_info.pDependencies = &dependency;
 	create_info.pNext = 0;
 	create_info.flags = 0;
+	
 
 	vk_assert(vkCreateRenderPass(context->device.logical_device, &create_info, context->vk_allocator, &renderpass->renderpass_handle));
 }
@@ -759,4 +768,133 @@ void vk_renderpass_end(vk_cmdbuffer* cmdbuffer,vk_renderpass* renderpass)
 }
 
 
+void vk_cmdbuffer_allocate(
+	vk_context* context,
+	VkCommandPool pool,
+	bool is_primary,
+	vk_cmdbuffer* cmdbuffer)
+{
+
+	VkCommandBufferAllocateInfo create_info = {};
+	create_info.commandBufferCount = 1;
+	create_info.commandPool = pool;
+	create_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	create_info.pNext = 0;
+	create_info.level = is_primary ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+
+	cmdbuffer->cmdbuffer_state = CMD_NOT_ALLOCATED;
+	vk_assert(vkAllocateCommandBuffers(context->device.logical_device, &create_info, &cmdbuffer->cmdbuffer_handle));
+	cmdbuffer->cmdbuffer_state = CMD_READY;
+
+}
+
+void vk_cmdbuffer_free(
+	vk_context* context,
+	VkCommandPool pool,
+	vk_cmdbuffer* cmdbuffer)
+{
+	vkFreeCommandBuffers(context->device.logical_device, pool, 1, &cmdbuffer->cmdbuffer_handle);
+
+	cmdbuffer->cmdbuffer_handle = 0;
+	cmdbuffer->cmdbuffer_state = CMD_NOT_ALLOCATED;
+}
+
+void vk_cmdbuffer_begin(
+	vk_cmdbuffer* cmdbuffer,
+	bool is_single_use,
+	bool is_renderpass_continue_use,
+	bool is_simultaneous_use)
+{
+	VkCommandBufferBeginInfo create_info = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+	create_info.flags = 0;
+	if (is_single_use)
+		create_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+	if (is_renderpass_continue_use)
+		create_info.flags |= VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+	if (is_simultaneous_use)
+		create_info.flags |= VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+
+	vk_assert(vkBeginCommandBuffer(cmdbuffer->cmdbuffer_handle, &create_info));
+	cmdbuffer->cmdbuffer_state = CMD_RECORDING;
+}
+
+void vk_cmdbuffer_end(vk_cmdbuffer* cmdbuffer)
+{
+	vk_assert(vkEndCommandBuffer(cmdbuffer->cmdbuffer_handle));
+	cmdbuffer->cmdbuffer_state = CMD_RECORDING_ENDED;
+}
+
+
+void vk_cmdbuffer_update_submitted(vk_cmdbuffer* cmdbuffer)
+{
+	cmdbuffer->cmdbuffer_state = CMD_SUBMITTED;
+}
+void vk_cmdbuffer_reset(vk_cmdbuffer* cmdbuffer)
+{
+	cmdbuffer->cmdbuffer_state = CMD_READY;
+}
+
+
+void vk_cmdbuffer_allocate_and_begin_single_use(
+	vk_context* context,
+	VkCommandPool pool,
+	vk_cmdbuffer* cmdbuffer)
+{
+	vk_cmdbuffer_allocate(context, pool, true, cmdbuffer);
+	vk_cmdbuffer_begin(cmdbuffer, true, false, false);
+}
+
+
+void vk_cmdbuffer_free_and_end_single_use(
+	vk_context* context,
+	VkCommandPool pool,
+	vk_cmdbuffer* cmdbuffer,
+	VkQueue queue)
+{
+	vk_cmdbuffer_end(cmdbuffer);
+
+	VkSubmitInfo submit_info = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+	submit_info.commandBufferCount = 1;
+	submit_info.pCommandBuffers = &cmdbuffer->cmdbuffer_handle;
+
+	vk_assert(vkQueueSubmit(queue, 1, &submit_info, 0));
+
+	vk_assert(vkQueueWaitIdle(queue));
+
+	vk_cmdbuffer_free(context, pool, cmdbuffer);
+}
+
+void vk_create_frambuffer(
+	vk_context* context,
+	vk_renderpass* renderpass,
+	u32 w,
+	u32 h,
+	u32 view_counts,
+	VkImageView* views,
+	vk_framebuffer* framebuffer)
+{
+	framebuffer->views = (VkImageView*)malloc(view_counts * sizeof(VkImageView));
+	for (i32 i = 0; i < view_counts; i++)
+	{
+		framebuffer->views[i] = views[i];
+	}
+	framebuffer->renderpass = renderpass;
+	framebuffer->view_counts = view_counts;
+
+	VkFramebufferCreateInfo create_info = {VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO};
+	create_info.attachmentCount = view_counts;
+	create_info.pAttachments = framebuffer->views;
+	create_info.renderPass = renderpass->renderpass_handle;
+	create_info.width = w;
+	create_info.height = h;
+	create_info.layers = 1;
+
+	vk_assert(vkCreateFramebuffer(
+		context->device.logical_device,
+		&create_info, context->vk_allocator, 
+		&framebuffer->framebuffer_handle));
+}
+
+
+size_t y;
 

@@ -77,6 +77,8 @@ struct vk_device
 	VkQueue transfer_queue;
 
 	VkFormat depth_format;
+
+	VkCommandPool g_cmdpool;
 };
 
 
@@ -116,6 +118,14 @@ struct vk_cmdbuffer {
 
 	vk_cmdbuffer_state cmdbuffer_state;
 };
+
+struct vk_framebuffer {
+	VkFramebuffer framebuffer_handle;
+	u32 view_counts;
+	VkImageView* views;
+	vk_renderpass* renderpass;
+};
+
 struct vk_context
 {
 
@@ -141,6 +151,8 @@ struct vk_context
 
 	u32 frame_buffer_w;
 	u32 frame_buffer_h;
+
+	vk_cmdbuffer* g_cmd_buffer;
 };
 
 
@@ -262,4 +274,11 @@ void vk_cmdbuffer_free_and_end_single_use(
 	vk_cmdbuffer* cmdbuffer,
 	VkQueue queue);
 
-
+void vk_create_frambuffer(
+	vk_context* context,
+	vk_renderpass* renderpass,
+	u32 w,
+	u32 h,
+	u32 view_counts,
+	VkImageView* views,
+	vk_framebuffer* framebuffer);

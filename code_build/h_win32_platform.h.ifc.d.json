@@ -1,10 +1,10 @@
 {
     "Version": "1.2",
     "Data": {
-        "Source": "w:\\engine\\code\\h_win32_platform.h",
+        "Source": "c:\\code\\engine\\code\\h_win32_platform.h",
         "ProvidedModule": "",
         "Includes": [
-            "w:\\engine\\code\\h_windows.h",
+            "c:\\code\\engine\\code\\h_windows.h",
             "c:\\program files (x86)\\windows kits\\10\\include\\10.0.22621.0\\um\\windows.h",
             "c:\\program files (x86)\\windows kits\\10\\include\\10.0.22621.0\\shared\\winapifamily.h",
             "c:\\program files (x86)\\windows kits\\10\\include\\10.0.22621.0\\shared\\winpackagefamily.h",
@@ -114,7 +114,7 @@
             "c:\\program files (x86)\\windows kits\\10\\include\\10.0.22621.0\\shared\\stralign.h",
             "c:\\program files (x86)\\windows kits\\10\\include\\10.0.22621.0\\um\\imm.h",
             "c:\\program files (x86)\\windows kits\\10\\include\\10.0.22621.0\\um\\ime_cmodes.h",
-            "w:\\engine\\code\\h_type.h",
+            "c:\\code\\engine\\code\\h_type.h",
             "c:\\program files\\microsoft visual studio\\2022\\community\\vc\\tools\\msvc\\14.41.34120\\include\\cstdint",
             "c:\\program files\\microsoft visual studio\\2022\\community\\vc\\tools\\msvc\\14.41.34120\\include\\yvals_core.h",
             "c:\\program files\\microsoft visual studio\\2022\\community\\vc\\tools\\msvc\\14.41.34120\\include\\xkeycheck.h",

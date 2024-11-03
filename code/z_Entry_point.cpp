@@ -29,5 +29,20 @@ int main()
 		0.f, 0.f, 0.2f, 1.0f,
 		1.f,
 		0);
+	if (!vk_context.g_cmd_buffer)
+	{
+		vk_context.g_cmd_buffer = (vk_cmdbuffer*)malloc(vk_context.swapchain_info.image_counts * sizeof(vk_cmdbuffer));
+		for (i32 i = 0; i < vk_context.swapchain_info.image_counts; i++)
+		{
+			vk_context.g_cmd_buffer[i].cmdbuffer_handle = nullptr;
+		}
+	}
+	for (i32 i = 0; i < vk_context.swapchain_info.image_counts; i++)
+	{
+		if (vk_context.g_cmd_buffer[i].cmdbuffer_handle != nullptr)
+			vk_cmdbuffer_free(&vk_context, vk_context.device.g_cmdpool, &vk_context.g_cmd_buffer[i]);
+
+		vk_cmdbuffer_allocate(&vk_context, vk_context.device.g_cmdpool, true,&vk_context.g_cmd_buffer[i]);
+	}
 	show_window(&win32_context);
 }
