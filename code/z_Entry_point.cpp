@@ -44,5 +44,21 @@ int main()
 
 		vk_cmdbuffer_allocate(&vk_context, vk_context.device.g_cmdpool, true,&vk_context.g_cmd_buffer[i]);
 	}
+	const u32 attachments_counts = 2;
+	vk_context.swapchain_info.framebuffer = (vk_framebuffer*)malloc(vk_context.swapchain_info.image_counts * sizeof(vk_framebuffer));
+	for (i32 i = 0; i < attachments_counts; i++)
+	{
+		VkImageView attachment[attachments_counts] = { 
+			vk_context.swapchain_info.views[i] , 
+			vk_context.swapchain_info.depth_image.view };
+
+		vk_create_frambuffer(&vk_context,
+			&vk_context.main_renderpass,
+			200,
+			200,
+			attachments_counts,
+			attachment,
+			&vk_context.swapchain_info.framebuffer[i]);
+	}
 	show_window(&win32_context);
 }

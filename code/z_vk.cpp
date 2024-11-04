@@ -95,12 +95,20 @@ CreateSwapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u
 	if (swapchain_info->image_counts > 0) {
 		//TODO::log
 		std::cout << "images_counts = " << swapchain_info->image_counts << std::endl;
-		swapchain_info->images = (VkImage*)alloca(swapchain_info->image_counts * sizeof(VkImage));
+		if (swapchain_info->images != nullptr)
+		{
+			free(swapchain_info->images);
+		}
+		swapchain_info->images = (VkImage*)malloc(swapchain_info->image_counts * sizeof(VkImage));
 		vkGetSwapchainImagesKHR(context->device.logical_device, swapchain_info->swapchain_handle, &swapchain_info->image_counts, swapchain_info->images);
 	}
 
 	//views
-	swapchain_info->views = (VkImageView*)alloca(swapchain_info->image_counts * sizeof(VkImageView));
+	if (swapchain_info->views != nullptr)
+	{
+		free(swapchain_info->views);
+	}
+	swapchain_info->views = (VkImageView*)malloc(swapchain_info->image_counts * sizeof(VkImageView));
 	for (u32 i = 0; i < swapchain_info->image_counts; ++i) {
 		VkImageViewCreateInfo view_info = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
 		view_info.image = swapchain_info->images[i];
@@ -650,6 +658,17 @@ void vk_create_renderpass(
 	f32 depth, u32 stencil)
 
 {
+	renderpass->x = x;
+	renderpass->y = y;
+	renderpass->w = w;
+	renderpass->h = h;
+
+	renderpass->r = r;
+	renderpass->g = g;
+	renderpass->b = b;
+	renderpass->a = a;
+
+
 	VkSubpassDescription subpass = {};
 	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	
@@ -896,5 +915,4 @@ void vk_create_frambuffer(
 }
 
 
-size_t y;
 

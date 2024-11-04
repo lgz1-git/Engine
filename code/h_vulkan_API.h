@@ -89,18 +89,7 @@ struct vk_depth_image {
 	u32 w;
 	u32 h;
 };
-struct vk_swapchain_info
-{
-	VkSurfaceFormatKHR surface_format;
-	u8 max_frames_in_flight;
-	VkSwapchainKHR swapchain_handle;
-	u32 image_counts;
-	//TODO::clean up
-	VkImage* images;
-	VkImageView* views;
 
-	vk_depth_image depth_image;
-};
 
 struct vk_renderpass {
 	VkRenderPass renderpass_handle;
@@ -125,6 +114,22 @@ struct vk_framebuffer {
 	VkImageView* views;
 	vk_renderpass* renderpass;
 };
+
+struct vk_swapchain_info
+{
+	vk_framebuffer* framebuffer;
+
+	VkSurfaceFormatKHR surface_format;
+	u8 max_frames_in_flight;
+	VkSwapchainKHR swapchain_handle;
+	u32 image_counts;
+	//TODO::clean up
+	VkImage* images;
+	VkImageView* views;
+
+	vk_depth_image depth_image;
+};
+
 
 struct vk_context
 {
@@ -282,3 +287,5 @@ void vk_create_frambuffer(
 	u32 view_counts,
 	VkImageView* views,
 	vk_framebuffer* framebuffer);
+
+
