@@ -60,5 +60,32 @@ int main()
 			attachment,
 			&vk_context.swapchain_info.framebuffer[i]);
 	}
+
+	////info;sync
+	vk_context.image_available_semphores = (VkSemaphore*)malloc(vk_context.swapchain_info.max_frames_in_flight * sizeof(VkSemaphore));
+	vk_context.queue_complete_semphores = (VkSemaphore*)malloc(vk_context.swapchain_info.max_frames_in_flight * sizeof(VkSemaphore));
+	vk_context.in_flight_fence = (vk_fence*)malloc(vk_context.swapchain_info.max_frames_in_flight * sizeof(vk_fence));
+
+	for (i32 i = 0; i < vk_context.swapchain_info.max_frames_in_flight; i++) {
+		VkSemaphoreCreateInfo create_info = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+		vkCreateSemaphore(
+			vk_context.device.logical_device, 
+			&create_info, 
+			vk_context.vk_allocator, 
+			&vk_context.image_available_semphores[i]);
+		vkCreateSemaphore(
+			vk_context.device.logical_device,
+			&create_info,
+			vk_context.vk_allocator,
+			&vk_context.queue_complete_semphores[i]);
+
+		vk_create_fence(&vk_context, true, &vk_context.in_flight_fence[i]);
+	}
+
+	vk_context.iamges_in_flight  = (vk_fence**)malloc(vk_context.swapchain_info.image_counts * sizeof(vk_fence*));
+	for (i32 i = 0; i < vk_context.swapchain_info.image_counts; i++) {
+		vk_context.iamges_in_flight[i] = 0;
+	}
+
 	show_window(&win32_context);
 }

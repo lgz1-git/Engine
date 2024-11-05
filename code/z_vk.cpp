@@ -646,6 +646,8 @@ void vk_swapchain_present(
 		//TODO::log
 		std::cout << "fail to present iamges\n";
 	}
+
+	context->current_frame = (context->current_frame + 1) % swapchain_info->max_frames_in_flight;
 }
 
 
@@ -912,6 +914,67 @@ void vk_create_frambuffer(
 		context->device.logical_device,
 		&create_info, context->vk_allocator, 
 		&framebuffer->framebuffer_handle));
+}
+
+
+void vk_create_fence(vk_context* context, bool create_signal, vk_fence* fence)
+{
+	fence->is_signaled = create_signal;
+	VkFenceCreateInfo create_info = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
+	if (fence->is_signaled) {
+		create_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+	}
+	vkCreateFence(
+		context->device.logical_device,
+		&create_info,
+		context->vk_allocator,
+		&fence->fence_handle);
+
+}
+
+void vk_destroy_fence(vk_context* context, vk_fence* fence);
+
+bool vk_fence_wait(vk_context* context, vk_fence* fence, u64 time_out_ns)
+{
+	if (!fence->is_signaled)
+	{
+		VkResult result = vkWaitForFences(context->device.logical_device, 1, &fence->fence_handle, true, time_out_ns);
+		//todo::info::
+		switch (result)
+		{
+		case VK_SUCCESS: {
+			fence->is_signaled = true;
+			return true;
+		}break;
+
+		case VK_TIMEOUT: {
+
+		}break;
+
+		case VK_ERROR_DEVICE_LOST: {
+
+		}break;
+
+		case VK_ERROR_OUT_OF_HOST_MEMORY: {
+
+		}break;
+
+		default: {
+
+		} break;
+		}
+	}
+	else {
+		return true;
+	}
+}
+
+void vk_fence_reset(vk_context* context, vk_fence* fence)
+{
+	if (fence->is_signaled) {
+		vkResetFences(context->device.logical_device, 1, &fence->fence_handle);
+		fence->is_signaled = false;
+	}
 }
 
 

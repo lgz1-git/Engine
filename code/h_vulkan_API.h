@@ -131,6 +131,11 @@ struct vk_swapchain_info
 };
 
 
+struct vk_fence {
+	VkFence fence_handle;
+	bool is_signaled;
+};
+
 struct vk_context
 {
 
@@ -144,10 +149,20 @@ struct vk_context
 
 	vk_renderpass main_renderpass;
 
+	////signal
+	VkSemaphore* image_available_semphores;
+	VkSemaphore* queue_complete_semphores;
+
+	u32 in_flght_fence_counts;
+
+	vk_fence* in_flight_fence;
+	vk_fence**  iamges_in_flight;
+
 	std::vector<const char* > instance_extensions;
 	std::vector<const char* > instance_layers_extensions;
 	std::vector<const char* > device_extensions;
 	std::vector<const char* > device_layers_extensions;
+
 
 	vk_swapchain_info swapchain_info;
 
@@ -287,5 +302,13 @@ void vk_create_frambuffer(
 	u32 view_counts,
 	VkImageView* views,
 	vk_framebuffer* framebuffer);
+
+void vk_create_fence(vk_context* context,bool create_signal ,vk_fence* fence);
+
+void vk_destroy_fence(vk_context* context, vk_fence* fence);
+
+bool vk_fence_wait(vk_context* context, vk_fence* fence, u64 time_out_ns);
+
+void vk_fence_reset(vk_context* context, vk_fence* fence);
 
 
