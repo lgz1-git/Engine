@@ -93,8 +93,8 @@ CreateSwapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u
 	context->current_frame = 0;
 	vk_assert(vkGetSwapchainImagesKHR(context->device.logical_device, swapchain_info->swapchain_handle, &swapchain_info->image_counts, 0));
 	if (swapchain_info->image_counts > 0) {
-		//TODO::log
-		std::cout << "images_counts = " << swapchain_info->image_counts << std::endl;
+
+		LINFOP("images_counts = " , swapchain_info->image_counts);
 		if (swapchain_info->images != nullptr)
 		{
 			free(swapchain_info->images);
@@ -124,8 +124,7 @@ CreateSwapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u
 
 	if (vk_query_pdevice_depth_format(&context->device) == false) {
 		context->device.depth_format = VK_FORMAT_UNDEFINED;	
-		//TODO::log
-		std::cout << "not support depth format" << std::endl;
+		LERR("not support depth format");
 	}
 
 	vk_create_image(
@@ -164,6 +163,8 @@ void vk_init_extensions(vk_context* context)
 	context->device_extensions.emplace_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 	context->device_extensions.emplace_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 	context->device_layers_extensions.reserve(3);
+
+	LINFO("extension is loaded!");
 }
 
 
@@ -187,6 +188,7 @@ void vk_create_instance(vk_context* context)
 	
 	
 	vkCreateInstance(&instance_create_info, context->vk_allocator, &context->vk_instance);
+	LINFO("vulkan instance is created!");
 }
 
 
@@ -196,8 +198,7 @@ bool vk_select_pdevice(vk_context* context)
 	vkEnumeratePhysicalDevices(context->vk_instance, &counts, 0);
 	if (counts == 0)
 	{
-		///TODO:logging
-		std::cout << "no physical_deivce\n";
+		LERR("no physical_deivce");
 		return false;
 	}
 
@@ -240,12 +241,12 @@ bool vk_select_pdevice(vk_context* context)
 		{
 			context->device.physical_device = physical_device[i];
 			context->device.queue_family_info = queue_family_info;
-			////TODO::logging
-			std::cout << "physical_device : " << i << "\n";
-			std::cout << "Graphics Family index : " << context->device.queue_family_info.graphics_family_index << "\n";
-			std::cout << "present Family index  :  " << context->device.queue_family_info.present_family_index << "\n";
-			std::cout << "transfer Family index : " << context->device.queue_family_info.transfer_family_index << "\n";
-			std::cout << "compute Family index  :  " << context->device.queue_family_info.compute_family_index << std::endl;
+			
+			LINFOP("physical_device : ", i);
+			LINFOP("Graphics Family index : ",context->device.queue_family_info.graphics_family_index);
+			LINFOP("present  Family index : ",context->device.queue_family_info.present_family_index );
+			LINFOP("transfer Family index : ",context->device.queue_family_info.transfer_family_index);
+			LINFOP("compute  Family index : ",context->device.queue_family_info.compute_family_index );
 
 			////pdevice_swapchain_potency
 			vk_query_pdevice_swapchain_potency(
@@ -257,8 +258,8 @@ bool vk_select_pdevice(vk_context* context)
 			return true;
 		}
 	}
-	//TODO::logging
-	std::cout << "device not suitable\n";
+	
+	LERR("device not suitable");
 	return false;
 }
 
@@ -282,8 +283,7 @@ bool vk_pdevice_meets_required(
 	{
 		if (properties->deviceType != VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
 		{
-			///TODO:LOGGING
-			std::cout << "not discrete gpu\n";
+			LERR("not discrete gpu");
 			return false;
 		}
 	}
@@ -293,14 +293,12 @@ bool vk_pdevice_meets_required(
 	vkGetPhysicalDeviceQueueFamilyProperties(pdevice, &queuefamily_counts, 0);
 	if (queuefamily_counts != 0)
 	{
-		//TODO::log
-		std::cout << queuefamily_counts << std::endl;
+		LINFOP("queue family counts is :  ", queuefamily_counts);
 		queuefamily_properties = (VkQueueFamilyProperties*)alloca(queuefamily_counts * sizeof(VkQueueFamilyProperties));
 		vkGetPhysicalDeviceQueueFamilyProperties(pdevice, &queuefamily_counts, queuefamily_properties);
 	}
 	else {
-		////TODO::
-		std::cout << "queuefamily_counts = 0\n";
+		LERR("queuefamily_counts = 0.");
 	}
 
 
@@ -344,28 +342,21 @@ bool vk_pdevice_meets_required(
 		(!queue_requirements->present || (queue_requirements->present && queue_family_info->present_family_index != -1)) &&
 		(!queue_requirements->compute || (queue_requirements->compute && queue_family_info->compute_family_index != -1)) &&
 		(!queue_requirements->transfer || (queue_requirements->transfer && queue_family_info->transfer_family_index != -1))) {
-		//TODO:LOGGING
-		std::cout << "device queuefamily is enable\n";
-		std::cout << "Graphics Family index : " << queue_family_info->graphics_family_index << "\n";
-		std::cout << "present Family index : " << queue_family_info->present_family_index << "\n";
-		std::cout << "transfer Family index : " << queue_family_info->transfer_family_index << "\n";
-		std::cout << "compute Family index : " << queue_family_info->compute_family_index << std::endl;
 
+		LINFO("device queuefamily is OK , data is preserve");
 
 	}
 
 	if (queue_requirements->sampler_anisotropy && features->samplerAnisotropy)
 	{
-		//TODO::LOGGING
-		std::cout << "device support anisotropy\n";
+		
+		LINFO("device support anisotropy.");
 		return true;
 	}
 	else
 	{
-		//TODO::LOGGing
-		std::cout << " fail" << std::endl;
+		LERR("phisical device is not support anisotripy.")
 	}
-
 	return false;
 	
 }
@@ -387,8 +378,8 @@ void vk_query_pdevice_swapchain_potency(VkPhysicalDevice pdevice,
 			device_swapchain_potency->surface_formats));
 	}
 	else {
-		//TODO::log
-		std::cout << "device no swapchain potency" << std::endl;
+		
+		LERR( "phisical device no swapchain potency");
 	}
 	vk_assert(vkGetPhysicalDeviceSurfacePresentModesKHR(
 		pdevice,
@@ -406,8 +397,8 @@ void vk_query_pdevice_swapchain_potency(VkPhysicalDevice pdevice,
 		surface,
 		&device_swapchain_potency->present_modes_counts,
 		device_swapchain_potency->present_modes));
-	////TODO:: log
-	std::cout << "device potency init!\n" ;
+	
+	LINFO("phisical device has the swapchian potency!");
 }
 
 bool vk_query_pdevice_depth_format(vk_device* device)
@@ -485,8 +476,7 @@ void vk_create_image(
 	// Allocate memory
 	if (memory_typeindex == -1)
 	{
-		//TODO::log
-		std::cout << "no memoty type for image\n";
+		LERR("no memory type for image");
 	}
 	VkMemoryAllocateInfo memory_allocate_info = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO }; 
 	memory_allocate_info.allocationSize  = memory_requirements.size;
@@ -532,6 +522,8 @@ void vk_create_surface(vk_context* context, win32_platform_context* win_context)
 	surface_createinfo.hinstance = win_context->win_instance;
 	surface_createinfo.hwnd = win_context->win_handle;
 	vkCreateWin32SurfaceKHR(context->vk_instance, &surface_createinfo, context->vk_allocator, &context->vk_surface);
+
+	LINFO("vulkan surface is creates!");
 }
 
 
@@ -557,21 +549,25 @@ void vk_create_device(vk_context* context)
 	device_create_info.ppEnabledExtensionNames = &context->device_extensions[0];
 
 	vk_assert(vkCreateDevice(context->device.physical_device,&device_create_info,context->vk_allocator,&context->device.logical_device));
+	LINFO("logical device is created!");
 
 	vkGetDeviceQueue(context->device.logical_device, context->device.queue_family_info.graphics_family_index, 0, &context->device.graphics_queue);
 	vkGetDeviceQueue(context->device.logical_device, context->device.queue_family_info.graphics_family_index, 0, &context->device.present_queue);
 	vkGetDeviceQueue(context->device.logical_device, context->device.queue_family_info.present_family_index, 0, &context->device.transfer_queue);
+	LINFO("logical device queue handle is binded!");
 
 	VkCommandPoolCreateInfo pool_create = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
 	pool_create.queueFamilyIndex = context->device.queue_family_info.graphics_family_index;
 	pool_create.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 	vkCreateCommandPool(context->device.logical_device, &pool_create,context->vk_allocator, &context->device.g_cmdpool);
+	LINFO("logical device command pool is created!");
 }
 
 
 void vk_create_swapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u32 h)
 {
 	CreateSwapchain(context, swapchain_info, w, h);
+	LINFO("swapchain is created!");
 }
 
 
@@ -609,8 +605,8 @@ bool vk_swapchain_acquire_next_image_index(
 		return false;
 	}
 	else if (result!=VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-		//TODO::log
-		std::cout << "fail to get next image" << std::endl;
+		
+		LERR( "fail to get next image") ;
 		return false;
 	}
 
@@ -643,8 +639,8 @@ void vk_swapchain_present(
 
 	}
 	else if (result != VK_SUCCESS) {
-		//TODO::log
-		std::cout << "fail to present iamges\n";
+		
+		LERR("fail to present iamges");
 	}
 
 	context->current_frame = (context->current_frame + 1) % swapchain_info->max_frames_in_flight;
@@ -752,6 +748,7 @@ void vk_create_renderpass(
 	
 
 	vk_assert(vkCreateRenderPass(context->device.logical_device, &create_info, context->vk_allocator, &renderpass->renderpass_handle));
+	LINFO("renderpass is created!");
 }
 
 
