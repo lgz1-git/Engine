@@ -11,12 +11,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="code\z_clock.cpp" />
+    <ClCompile Include="code\z_clogger.cpp" />
     <ClCompile Include="code\z_Entry_point.cpp" />
     <ClCompile Include="code\z_vk.cpp" />
     <ClCompile Include="code\h_win32_platform.h" />
     <ClCompile Include="code\z_win32_platform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="code\h_clock.h" />
+    <ClInclude Include="code\h_clogger.h" />
     <ClInclude Include="code\h_renderer.h" />
     <ClInclude Include="code\h_type.h" />
     <ClInclude Include="code\h_windows.h" />

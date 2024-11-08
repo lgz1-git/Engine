@@ -1,10 +1,6 @@
 #include "h_win32_platform.h"
 
-void 
-create_window_info(win32_platform_context* context, win32_config* config)
-{
 
-}
 
 void 
 create_window(win32_platform_context* context, win32_config* config)
@@ -23,7 +19,7 @@ create_window(win32_platform_context* context, win32_config* config)
             config->win_classname, 
             config->win_name,
             WS_SIZEBOX | WS_CAPTION | WS_SYSMENU| WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_VISIBLE,
-	        0, 0,
+	        100, 100,
 	        240, 240,
 	        0, 0, context->win_instance, 0);
 
@@ -33,35 +29,23 @@ create_window(win32_platform_context* context, win32_config* config)
 
 }
 
-void show_window(win32_platform_context* context)
-{
-    ShowWindow(context->win_handle, SW_SHOW);
-
-    MSG msg = {};
-    while (GetMessageA(&msg, nullptr, 0, 0))
-    {
-        /*if (msg.message == WM_QUIT)*/
-
-        TranslateMessage(&msg);
-        DispatchMessageA(&msg);
-    }
-}
-
 static LRESULT
 CALLBACK WindowProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
-    switch (msg)
-    {
-   
-    case WM_CLOSE:
-    {
-       
-    }break;
-   
-    case WM_SYSKEYUP:
-    case WM_SYSKEYDOWN:
-    case WM_KEYUP:
-    case WM_KEYDOWN:
+    switch (msg){
+
+        case WM_CLOSE:{
+        
+            LTRACE("window close");
+               
+        }break;
+        case WM_DESTROY: {
+            LTRACE("window destory");
+        }break;
+        case WM_SYSKEYUP:
+        case WM_SYSKEYDOWN:
+        case WM_KEYUP:
+        case WM_KEYDOWN:
     {
         u32 vkcode = wparam;
         bool wasdown = ((lparam >> 30 & 1) != 0);
@@ -107,12 +91,13 @@ CALLBACK WindowProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
         }
 
     }break;
-    /*default:
-    {
+        case WM_CHAR: {
+        //todo::input text
 
-    }break;*/
+        }
+        default:
+        return DefWindowProcA(wnd, msg, wparam, lparam);
     }
-    return DefWindowProcA(wnd, msg, wparam, lparam);
 }
 
 

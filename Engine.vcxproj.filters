@@ -27,6 +27,12 @@
     <ClCompile Include="code\z_vk.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="code\z_clogger.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="code\z_clock.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code\h_windows.h">
@@ -39,6 +45,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="code\h_renderer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="code\h_clock.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="code\h_clogger.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

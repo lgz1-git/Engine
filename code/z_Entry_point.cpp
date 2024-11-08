@@ -1,14 +1,22 @@
 #include "h_win32_platform.h"
-#include "h_vulkan_API.h"
 
-#include <iostream>
+#include "h_vulkan_API.h"
+#include "h_clogger.h"
+#include "h_clock.h"
+
+bool g_running;
+
+
 int main()
 {
+
 	win32_platform_context win32_context = {};
 	win32_config config = {};
 	config.win_classname = "class name";
 	config.win_name = "window name";
 	create_window(&win32_context, &config);
+	assert(win32_context.win_handle != 0);
+
 
 	vk_context vk_context = {};
 	vk_context.vk_allocator = nullptr;
@@ -18,7 +26,7 @@ int main()
 	bool result = vk_select_pdevice(&vk_context);
 	if (result)
 	{
-		std::cout << "yes";
+		LINFO("pdevice is yes");
 	}
 	vk_create_device(&vk_context);
 	vk_create_swapchain(&vk_context, &vk_context.swapchain_info, 200, 200);
@@ -87,5 +95,26 @@ int main()
 		vk_context.iamges_in_flight[i] = 0;
 	}
 
-	show_window(&win32_context);
+	
+	ShowWindow(win32_context.win_handle, SW_SHOW);
+	g_running = true;
+	MSG msg = {};
+	while (g_running == true)
+	{
+		while (PeekMessageA(&msg, win32_context.win_handle, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessageA(&msg);
+			if (msg.message == WM_CLOSE)
+			{
+				g_running = false;
+				break;
+			}
+		}
+		////todo::input
+
+		////todo::render
+	}
+
+	return 0;
 }
