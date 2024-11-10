@@ -4,23 +4,18 @@
 #include "h_clogger.h"
 #include "h_clock.h"
 
+#include "h_backend.h"
+
 bool g_running;
 
 
 int main()
 {
-	renderer_context context = {};
+	backend_context context = {};
 	context.vk_context.vk_allocator = nullptr;
+	bk_win32_init(&context.win32_context);
+	bk_vk_init(&context);
 
-	win32_config config = {};
-	config.win_classname = "class name";
-	config.win_name = "window name";
-	create_window(&context.win32_context, &config);
-	assert(context.win32_context.win_handle != 0);
-	
-	renderer_init(&context);
-	
-	ShowWindow(context.win32_context.win_handle, SW_SHOW);
 	g_running = true;
 	MSG msg = {};
 	while (g_running == true)

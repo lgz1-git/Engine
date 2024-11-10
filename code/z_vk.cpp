@@ -929,7 +929,10 @@ void vk_create_fence(vk_context* context, bool create_signal, vk_fence* fence)
 
 }
 
-void vk_destroy_fence(vk_context* context, vk_fence* fence);
+void vk_destroy_fence(vk_context* context, vk_fence* fence)
+{
+//	todo::
+}
 
 bool vk_fence_wait(vk_context* context, vk_fence* fence, u64 time_out_ns)
 {

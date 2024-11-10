@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="code\z_backend.cpp" />
     <ClCompile Include="code\z_clock.cpp" />
     <ClCompile Include="code\z_clogger.cpp" />
     <ClCompile Include="code\z_Entry_point.cpp" />
@@ -24,6 +25,7 @@
     <ClInclude Include="code\h_clogger.h" />
     <ClInclude Include="code\h_renderer.h" />
     <ClInclude Include="code\h_type.h" />
+    <ClInclude Include="code\h_backend.h" />
     <ClInclude Include="code\h_windows.h" />
     <ClInclude Include="code\h_vulkan_API.h" />
   </ItemGroup>

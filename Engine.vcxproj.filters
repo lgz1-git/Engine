@@ -36,6 +36,9 @@
     <ClCompile Include="code\z_renderer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="code\z_backend.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code\h_windows.h">
@@ -54,6 +57,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="code\h_clogger.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="code\h_backend.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
