@@ -1,6 +1,6 @@
 #include "h_win32_platform.h"
 
-
+extern bool g_running;
 
 void 
 create_window(win32_platform_context* context, win32_config* config)
@@ -37,6 +37,7 @@ CALLBACK WindowProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
         case WM_CLOSE:{
         
             LTRACE("window close");
+            g_running = false;
                
         }break;
         case WM_DESTROY: {

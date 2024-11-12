@@ -3,16 +3,16 @@
     "revision": 0,
     "rules": [
         {
-            "primary-output": "C:\\CODE\\Engine\\code_build\\h_win32_platform.h.obj",
+            "primary-output": "W:\\Engine\\code_build\\h_win32_platform.h.obj",
             "outputs": [
-                "C:\\CODE\\Engine\\code_build\\vc143.pdb",
-                "C:\\CODE\\Engine\\code_build\\",
-                "C:\\CODE\\Engine\\code_build\\h_win32_platform.h.ifc"
+                "W:\\Engine\\code_build\\vc143.pdb",
+                "W:\\Engine\\code_build\\",
+                "W:\\Engine\\code_build\\h_win32_platform.h.ifc"
             ],
             "provides": [
                 {
                     "logical-name": "code\\h_win32_platform.h",
-                    "source-path": "c:\\code\\engine\\code\\h_win32_platform.h",
+                    "source-path": "w:\\engine\\code\\h_win32_platform.h",
                     "lookup-method": "absolute"
                 }
             ],

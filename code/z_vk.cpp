@@ -94,7 +94,7 @@ CreateSwapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u
 	vk_assert(vkGetSwapchainImagesKHR(context->device.logical_device, swapchain_info->swapchain_handle, &swapchain_info->image_counts, 0));
 	if (swapchain_info->image_counts > 0) {
 
-		LINFOP("images_counts = " , swapchain_info->image_counts);
+		LINFO("images_counts = " << swapchain_info->image_counts);
 		if (swapchain_info->images != nullptr)
 		{
 			free(swapchain_info->images);
@@ -242,11 +242,11 @@ bool vk_select_pdevice(vk_context* context)
 			context->device.physical_device = physical_device[i];
 			context->device.queue_family_info = queue_family_info;
 			
-			LINFOP("physical_device : ", i);
-			LINFOP("Graphics Family index : ",context->device.queue_family_info.graphics_family_index);
-			LINFOP("present  Family index : ",context->device.queue_family_info.present_family_index );
-			LINFOP("transfer Family index : ",context->device.queue_family_info.transfer_family_index);
-			LINFOP("compute  Family index : ",context->device.queue_family_info.compute_family_index );
+			LINFO("physical_device : "<< i);
+			LINFO("Graphics Family index : "<<context->device.queue_family_info.graphics_family_index);
+			LINFO("present  Family index : "<<context->device.queue_family_info.present_family_index );
+			LINFO("transfer Family index : "<<context->device.queue_family_info.transfer_family_index);
+			LINFO("compute  Family index : "<<context->device.queue_family_info.compute_family_index );
 
 			////pdevice_swapchain_potency
 			vk_query_pdevice_swapchain_potency(
@@ -293,7 +293,7 @@ bool vk_pdevice_meets_required(
 	vkGetPhysicalDeviceQueueFamilyProperties(pdevice, &queuefamily_counts, 0);
 	if (queuefamily_counts != 0)
 	{
-		LINFOP("queue family counts is :  ", queuefamily_counts);
+		LINFO("queue family counts is :  "<< queuefamily_counts);
 		queuefamily_properties = (VkQueueFamilyProperties*)alloca(queuefamily_counts * sizeof(VkQueueFamilyProperties));
 		vkGetPhysicalDeviceQueueFamilyProperties(pdevice, &queuefamily_counts, queuefamily_properties);
 	}

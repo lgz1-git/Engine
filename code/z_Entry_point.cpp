@@ -11,6 +11,10 @@ bool g_running;
 
 int main()
 {
+	LTRACE("TRACE " << 32 << " well");
+	LINFO("INFO " << 32 << " well");
+	LTIME("TIME" << 32 << " well");
+	LERR("ERROR " << 32 << " well");
 	backend_context context = {};
 	context.vk_context.vk_allocator = nullptr;
 	bk_win32_init(&context.win32_context);
@@ -24,11 +28,6 @@ int main()
 		{
 			TranslateMessage(&msg);
 			DispatchMessageA(&msg);
-			if (msg.message == WM_CLOSE)
-			{
-				g_running = false;
-				break;
-			}
 		}
 		////todo::input
 

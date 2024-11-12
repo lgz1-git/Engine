@@ -2,7 +2,7 @@
 
 #include "h_windows.h"
 #include "h_clogger.h"
-#include"h_type.h"
+#include "h_type.h"
 #include <assert.h>
 
 
@@ -19,7 +19,6 @@ struct win32_config
 	const char* win_classname ;
 	const char* win_name ;
 };
-
 
 
 void create_window(win32_platform_context* context, win32_config* config);

@@ -27,9 +27,6 @@
     <ClCompile Include="code\z_vk.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="code\z_clogger.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="code\z_clock.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -37,6 +34,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="code\z_backend.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="code\z_global_variable.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="code\z_mem.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -60,6 +63,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="code\h_backend.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="code\h_mem.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
