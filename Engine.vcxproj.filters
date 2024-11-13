@@ -68,8 +68,12 @@
     <ClInclude Include="code\h_mem.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="code\h_global_list.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="vkinfo.txt" />
+    <Text Include="a.txt" />
   </ItemGroup>
 </Project>

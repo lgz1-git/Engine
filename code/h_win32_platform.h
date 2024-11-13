@@ -18,6 +18,8 @@ struct win32_config
 {
 	const char* win_classname ;
 	const char* win_name ;
+	f32 w;
+	f32 h;
 };
 
 

@@ -139,12 +139,30 @@ CreateSwapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u
 		true,
 		VK_IMAGE_ASPECT_DEPTH_BIT,
 		&swapchain_info->depth_image);
+
+	vk_create_image_view(
+		context,
+		context->device.depth_format,
+		&swapchain_info->depth_image,
+		VK_IMAGE_ASPECT_DEPTH_BIT);
+
 }
 
 static void
-DestorySwapchain(vk_context* context, vk_swapchain_info* swapchain_info)
+DestroySwapchain(vk_context* context, vk_swapchain_info* swapchain_info)
 {
-
+	vk_destroy_image(context, &swapchain_info->depth_image);
+	for (i32 i = 0; i < swapchain_info->image_counts; i++)
+	{
+		vkDestroyImageView(
+			context->device.logical_device,
+			swapchain_info->views[i],
+			context->vk_allocator);
+	}
+	vkDestroySwapchainKHR(
+		context->device.logical_device,
+		swapchain_info->swapchain_handle,
+		context->vk_allocator);
 }
 //::::::::::::::::::::::::::::::::::::::::::::::::::::swapchian::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -189,6 +207,12 @@ void vk_create_instance(vk_context* context)
 	
 	vkCreateInstance(&instance_create_info, context->vk_allocator, &context->vk_instance);
 	LINFO("vulkan instance is created!");
+}
+
+
+void vk_destroy_instance(vk_context* context)
+{
+	vkDestroyInstance(context->vk_instance, context->vk_allocator);;
 }
 
 
@@ -426,6 +450,8 @@ bool vk_query_pdevice_depth_format(vk_device* device)
 	return false;
 }
 
+
+//@Param:depth image
 void vk_create_image(
 	vk_context* context,
 	VkImageType image_type,
@@ -495,7 +521,6 @@ void vk_create_image(
 
 }
 
-
 void vk_create_image_view(
 	vk_context* context,
 	VkFormat format,
@@ -514,8 +539,20 @@ void vk_create_image_view(
 	vk_assert(vkCreateImageView(context->device.logical_device, &view_create_info, context->vk_allocator, &image->view));
 }
 
+void vk_destroy_image(vk_context* context, vk_depth_image* image)
+{
+	if (image->view) {
+		vkDestroyImageView(context->device.logical_device, image->view, context->vk_allocator);
+	}
+	if (image->memory) {
+		vkFreeMemory(context->device.logical_device, image->memory, context->vk_allocator);
+	}
+	if (image->image_handle) {
+		vkDestroyImage(context->device.logical_device, image->image_handle, context->vk_allocator);
+	}
+}
 
-
+//@Param:surface
 void vk_create_surface(vk_context* context, win32_platform_context* win_context)
 {
 	VkWin32SurfaceCreateInfoKHR surface_createinfo = { VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR };
@@ -527,6 +564,13 @@ void vk_create_surface(vk_context* context, win32_platform_context* win_context)
 }
 
 
+void vk_destroy_surface(vk_context* context)
+{
+	vkDestroySurfaceKHR(context->vk_instance, context->vk_surface, context->vk_allocator);
+}
+
+
+//@Param:device
 void vk_create_device(vk_context* context)
 {
 	VkDeviceQueueCreateInfo queue_create_info[2] = {};
@@ -563,7 +607,14 @@ void vk_create_device(vk_context* context)
 	LINFO("logical device command pool is created!");
 }
 
+void vk_destroy_device(vk_context* context)
+{
+	vkDestroyDevice(context->device.logical_device, context->vk_allocator);
+}
 
+
+
+//@Param: swapchain
 void vk_create_swapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u32 h)
 {
 	CreateSwapchain(context, swapchain_info, w, h);
@@ -573,14 +624,14 @@ void vk_create_swapchain(vk_context* context, vk_swapchain_info* swapchain_info,
 
 void vk_recreate_swapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u32 h)
 {
-	DestorySwapchain(context, swapchain_info);
+	DestroySwapchain(context, swapchain_info);
 	CreateSwapchain(context, swapchain_info, w, h);
 }
 
 
-void vk_destory_swapchain(vk_context* context, vk_swapchain_info* swapchain_info)
+void vk_destroy_swapchain(vk_context* context, vk_swapchain_info* swapchain_info)
 {
-	DestorySwapchain(context, swapchain_info);
+	DestroySwapchain(context, swapchain_info);
 }
 
 
@@ -647,7 +698,7 @@ void vk_swapchain_present(
 }
 
 
-
+//@Param:renderpass
 void vk_create_renderpass(
 	vk_context* context,
 	vk_renderpass* renderpass,
@@ -752,6 +803,13 @@ void vk_create_renderpass(
 }
 
 
+void vk_destroy_renderpass(vk_context* context, vk_renderpass* renderpass)
+{
+	if (renderpass && renderpass->renderpass_handle) {
+		vkDestroyRenderPass(context->device.logical_device, renderpass->renderpass_handle, context->vk_allocator);
+		renderpass->renderpass_handle = 0;
+	}
+}
 
 void vk_renderpass_begin(vk_cmdbuffer* cmdbuffer, vk_renderpass* renderpass, VkFramebuffer frame_buffer)
 {
@@ -786,6 +844,7 @@ void vk_renderpass_end(vk_cmdbuffer* cmdbuffer,vk_renderpass* renderpass)
 }
 
 
+//@Param:cmdbufffer
 void vk_cmdbuffer_allocate(
 	vk_context* context,
 	VkCommandPool pool,
@@ -862,7 +921,6 @@ void vk_cmdbuffer_allocate_and_begin_single_use(
 	vk_cmdbuffer_begin(cmdbuffer, true, false, false);
 }
 
-
 void vk_cmdbuffer_free_and_end_single_use(
 	vk_context* context,
 	VkCommandPool pool,
@@ -882,26 +940,29 @@ void vk_cmdbuffer_free_and_end_single_use(
 	vk_cmdbuffer_free(context, pool, cmdbuffer);
 }
 
-void vk_create_frambuffer(
+
+
+//@Param:framebuffer
+void vk_create_framebuffer(
 	vk_context* context,
 	vk_renderpass* renderpass,
 	u32 w,
 	u32 h,
-	u32 view_counts,
+	u32 attach_counts,
 	VkImageView* views,
 	vk_framebuffer* framebuffer)
 {
-	framebuffer->views = (VkImageView*)malloc(view_counts * sizeof(VkImageView));
-	for (i32 i = 0; i < view_counts; i++)
+	framebuffer->views = (VkImageView*)malloc(attach_counts * sizeof(VkImageView));
+	for (i32 i = 0; i < attach_counts; i++)
 	{
 		framebuffer->views[i] = views[i];
 	}
 	framebuffer->renderpass = renderpass;
-	framebuffer->view_counts = view_counts;
+	framebuffer->attachment_counts = attach_counts;
 
 	VkFramebufferCreateInfo create_info = {VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO};
-	create_info.attachmentCount = view_counts;
-	create_info.pAttachments = framebuffer->views;
+	create_info.attachmentCount = attach_counts;
+	create_info.pAttachments = &framebuffer->views[0];
 	create_info.renderPass = renderpass->renderpass_handle;
 	create_info.width = w;
 	create_info.height = h;
@@ -909,11 +970,23 @@ void vk_create_frambuffer(
 
 	vk_assert(vkCreateFramebuffer(
 		context->device.logical_device,
-		&create_info, context->vk_allocator, 
+		&create_info,
+		context->vk_allocator, 
 		&framebuffer->framebuffer_handle));
 }
 
 
+void vk_destroy_framebuffer(vk_context* context, vk_framebuffer* framebuffer)
+{
+	vkDestroyFramebuffer(
+		context->device.logical_device,
+		framebuffer->framebuffer_handle,
+		context->vk_allocator);
+}
+
+
+
+//@Param:signal
 void vk_create_fence(vk_context* context, bool create_signal, vk_fence* fence)
 {
 	fence->is_signaled = create_signal;
@@ -931,7 +1004,7 @@ void vk_create_fence(vk_context* context, bool create_signal, vk_fence* fence)
 
 void vk_destroy_fence(vk_context* context, vk_fence* fence)
 {
-//	todo::
+//	todo:
 }
 
 bool vk_fence_wait(vk_context* context, vk_fence* fence, u64 time_out_ns)

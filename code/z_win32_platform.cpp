@@ -20,7 +20,7 @@ create_window(win32_platform_context* context, win32_config* config)
             config->win_name,
             WS_SIZEBOX | WS_CAPTION | WS_SYSMENU| WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_VISIBLE,
 	        100, 100,
-	        240, 240,
+	        config->w, config->h,
 	        0, 0, context->win_instance, 0);
 
 

@@ -110,7 +110,7 @@ struct vk_cmdbuffer {
 
 struct vk_framebuffer {
 	VkFramebuffer framebuffer_handle;
-	u32 view_counts;
+	u32 attachment_counts;
 	VkImageView* views;
 	vk_renderpass* renderpass;
 };
@@ -181,7 +181,11 @@ void vk_init_extensions(vk_context* context);
 
 void vk_create_instance(vk_context* context);
 
+void vk_destroy_instance(vk_context* context);
+
 void vk_create_surface(vk_context* context, win32_platform_context* win_context);
+
+void vk_destroy_surface(vk_context* context);
 
 bool vk_select_pdevice(vk_context* context);
 
@@ -204,6 +208,8 @@ bool vk_query_pdevice_depth_format(vk_device* device);
 
 void vk_create_device(vk_context* context);
 
+void vk_destroy_device(vk_context* context);
+
 void vk_create_swapchain(vk_context* context,vk_swapchain_info* swapchain_info,u32 w,u32 h);
 
 void vk_create_image(
@@ -225,9 +231,11 @@ void vk_create_image_view(
 	vk_depth_image* image,
 	VkImageAspectFlags aepect_flag);
 
+void vk_destroy_image(vk_context* context, vk_depth_image* image);
+
 void vk_recreate_swapchain(vk_context* context,vk_swapchain_info* swapchain_info,u32 w,u32 h);
 
-void vk_destory_swapchain(vk_context* context, vk_swapchain_info* swapchain_info);
+void vk_destroy_swapchain(vk_context* context, vk_swapchain_info* swapchain_info);
 
 
 bool vk_swapchain_acquire_next_image_index(
@@ -255,7 +263,7 @@ void vk_create_renderpass(
 	f32 r, f32 g, f32 b, f32 a,
 	f32 depth, u32 stencil);
 
-void vk_destory_renderpass(vk_context* context, vk_renderpass* rederpass);
+void vk_destroy_renderpass(vk_context* context, vk_renderpass* rederpass);
 
 void vk_renderpass_begin(vk_cmdbuffer* cmdbuffer,vk_renderpass* renderpass,VkFramebuffer frame_buffer);
 
@@ -294,7 +302,7 @@ void vk_cmdbuffer_free_and_end_single_use(
 	vk_cmdbuffer* cmdbuffer,
 	VkQueue queue);
 
-void vk_create_frambuffer(
+void vk_create_framebuffer(
 	vk_context* context,
 	vk_renderpass* renderpass,
 	u32 w,
@@ -302,6 +310,8 @@ void vk_create_frambuffer(
 	u32 view_counts,
 	VkImageView* views,
 	vk_framebuffer* framebuffer);
+
+void vk_destroy_framebuffer(vk_context* context, vk_framebuffer* framebuffer);
 
 void vk_create_fence(vk_context* context,bool create_signal ,vk_fence* fence);
 
