@@ -2,7 +2,7 @@
 #include "h_win32_platform.h"
 #include "vulkan/vulkan.h"
 #if defined (_WIN32)
-#include <vulkan/vulkan_win32.h>
+#include "vulkan/vulkan_win32.h"
 #endif
 
 #include "h_type.h"
@@ -59,7 +59,7 @@ struct vk_pdevice_swapchain_potency
 	VkSurfaceCapabilitiesKHR capabilities;
 	u32 format_counts;
 	u32 present_modes_counts;
-	//TODO::to do
+	//TODO: clean up
 	VkSurfaceFormatKHR* surface_formats;
 	VkPresentModeKHR* present_modes;
 
@@ -111,6 +111,7 @@ struct vk_cmdbuffer {
 struct vk_framebuffer {
 	VkFramebuffer framebuffer_handle;
 	u32 attachment_counts;
+	//TODO:clean up
 	VkImageView* views;
 	vk_renderpass* renderpass;
 };
@@ -140,24 +141,21 @@ struct vk_context
 {
 
 	VkInstance vk_instance;
-
 	VkAllocationCallbacks *vk_allocator;
-
 	VkSurfaceKHR vk_surface;
-
 	vk_device device;
 
+	//renderpass
 	vk_renderpass main_renderpass;
 
-	////signal
+	//signal
 	VkSemaphore* image_available_semphores;
 	VkSemaphore* queue_complete_semphores;
-
 	u32 in_flght_fence_counts;
-
 	vk_fence* in_flight_fence;
-	vk_fence**  iamges_in_flight;
+	vk_fence**  images_in_flight;
 
+	//extension
 	std::vector<const char* > instance_extensions;
 	std::vector<const char* > instance_layers_extensions;
 	std::vector<const char* > device_extensions;
@@ -209,6 +207,8 @@ bool vk_query_pdevice_depth_format(vk_device* device);
 void vk_create_device(vk_context* context);
 
 void vk_destroy_device(vk_context* context);
+
+void vk_destory_cmdpool(vk_context* context);
 
 void vk_create_swapchain(vk_context* context,vk_swapchain_info* swapchain_info,u32 w,u32 h);
 

@@ -3,28 +3,56 @@
   "WorkspaceRootPath": "C:\\CODE\\Engine\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\z_vk.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\z_vk.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\z_backend.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\z_backend.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\h_backend.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\h_backend.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\z_backend.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\z_backend.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\z_global_variable.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\z_global_variable.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\h_clogger.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\h_clogger.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\z_vk.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\z_vk.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\z_Entry_point.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\z_Entry_point.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\z_win32_platform.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\z_win32_platform.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\h_vulkan_API.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\h_vulkan_API.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\z_Entry_point.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\z_Entry_point.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\z_renderer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\z_renderer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\h_global_list.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\h_global_list.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\a.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:a.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\h_mem.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\h_mem.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\z_mem.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\z_mem.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\h_clogger.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\h_clogger.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\h_win32_platform.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -35,32 +63,8 @@
       "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\h_renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\h_mem.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\h_mem.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\h_global_list.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\h_global_list.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\h_clock.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\h_clock.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\z_win32_platform.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\z_win32_platform.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\z_renderer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\z_renderer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\z_mem.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\z_mem.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\z_global_variable.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|solutionrelative:code\\z_global_variable.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1221F3A4-040E-454C-9800-72BABC8026FF}|Engine.vcxproj|C:\\CODE\\Engine\\code\\z_clock.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -85,97 +89,164 @@
           "SelectedChildIndex": 7,
           "Children": [
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "h_mem.h",
-              "DocumentMoniker": "C:\\CODE\\Engine\\code\\h_mem.h",
-              "RelativeDocumentMoniker": "code\\h_mem.h",
-              "ToolTip": "C:\\CODE\\Engine\\code\\h_mem.h",
-              "RelativeToolTip": "code\\h_mem.h",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAAACAAAAAmAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-11-12T12:27:03.15Z"
-            },
-            {
               "$type": "Document",
               "DocumentIndex": 7,
-              "Title": "h_renderer.h",
-              "DocumentMoniker": "C:\\CODE\\Engine\\code\\h_renderer.h",
-              "RelativeDocumentMoniker": "code\\h_renderer.h",
-              "ToolTip": "C:\\CODE\\Engine\\code\\h_renderer.h",
-              "RelativeToolTip": "code\\h_renderer.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAuAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-11-05T07:42:37.031Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "h_win32_platform.h",
-              "DocumentMoniker": "C:\\CODE\\Engine\\code\\h_win32_platform.h",
-              "RelativeDocumentMoniker": "code\\h_win32_platform.h",
-              "ToolTip": "C:\\CODE\\Engine\\code\\h_win32_platform.h",
-              "RelativeToolTip": "code\\h_win32_platform.h",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAAABUAAAAHAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-11-11T03:27:31.166Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "z_backend.cpp",
-              "DocumentMoniker": "C:\\CODE\\Engine\\code\\z_backend.cpp",
-              "RelativeDocumentMoniker": "code\\z_backend.cpp",
-              "ToolTip": "C:\\CODE\\Engine\\code\\z_backend.cpp",
-              "RelativeToolTip": "code\\z_backend.cpp",
-              "ViewState": "AgIAAEsAAAAAAAAAAAAAAF8AAAAuAAAAAAAAAA==",
+              "Title": "z_renderer.cpp",
+              "DocumentMoniker": "C:\\CODE\\Engine\\code\\z_renderer.cpp",
+              "RelativeDocumentMoniker": "code\\z_renderer.cpp",
+              "ToolTip": "C:\\CODE\\Engine\\code\\z_renderer.cpp",
+              "RelativeToolTip": "code\\z_renderer.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-11-11T04:11:15.065Z"
+              "WhenOpened": "2024-11-08T11:41:39.07Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 1,
+              "Title": "h_backend.h",
+              "DocumentMoniker": "C:\\CODE\\Engine\\code\\h_backend.h",
+              "RelativeDocumentMoniker": "code\\h_backend.h",
+              "ToolTip": "C:\\CODE\\Engine\\code\\h_backend.h",
+              "RelativeToolTip": "code\\h_backend.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-11-10T14:23:45.061Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "z_Entry_point.cpp",
               "DocumentMoniker": "C:\\CODE\\Engine\\code\\z_Entry_point.cpp",
               "RelativeDocumentMoniker": "code\\z_Entry_point.cpp",
               "ToolTip": "C:\\CODE\\Engine\\code\\z_Entry_point.cpp",
               "RelativeToolTip": "code\\z_Entry_point.cpp",
-              "ViewState": "AgIAAAQAAAAAAAAAAAAQwAkAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACEAAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-11-08T11:56:25.339Z"
+              "WhenOpened": "2024-11-08T11:56:25.339Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "h_vulkan_API.h",
-              "DocumentMoniker": "C:\\CODE\\Engine\\code\\h_vulkan_API.h",
-              "RelativeDocumentMoniker": "code\\h_vulkan_API.h",
-              "ToolTip": "C:\\CODE\\Engine\\code\\h_vulkan_API.h",
-              "RelativeToolTip": "code\\h_vulkan_API.h",
-              "ViewState": "AgIAANoAAAAAAAAAAAAmwOkAAABCAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-11-12T11:35:19.694Z"
+              "DocumentIndex": 9,
+              "Title": "a.txt",
+              "DocumentMoniker": "C:\\CODE\\Engine\\a.txt",
+              "RelativeDocumentMoniker": "a.txt",
+              "ToolTip": "C:\\CODE\\Engine\\a.txt",
+              "RelativeToolTip": "a.txt",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2024-11-13T08:16:17.334Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 5,
+              "Title": "z_win32_platform.cpp",
+              "DocumentMoniker": "C:\\CODE\\Engine\\code\\z_win32_platform.cpp",
+              "RelativeDocumentMoniker": "code\\z_win32_platform.cpp",
+              "ToolTip": "C:\\CODE\\Engine\\code\\z_win32_platform.cpp",
+              "RelativeToolTip": "code\\z_win32_platform.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-10-30T08:47:08.022Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "z_global_variable.cpp",
+              "DocumentMoniker": "C:\\CODE\\Engine\\code\\z_global_variable.cpp",
+              "RelativeDocumentMoniker": "code\\z_global_variable.cpp",
+              "ToolTip": "C:\\CODE\\Engine\\code\\z_global_variable.cpp",
+              "RelativeToolTip": "code\\z_global_variable.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-11-12T12:22:02.553Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "z_vk.cpp",
               "DocumentMoniker": "C:\\CODE\\Engine\\code\\z_vk.cpp",
               "RelativeDocumentMoniker": "code\\z_vk.cpp",
               "ToolTip": "C:\\CODE\\Engine\\code\\z_vk.cpp",
               "RelativeToolTip": "code\\z_vk.cpp",
-              "ViewState": "AgIAAHoDAAAAAAAAAAAQwKkDAAAGAAAAAAAAAA==",
+              "ViewState": "AgIAAMoBAAAAAAAAAAAmwNQBAAATAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-11-13T06:40:38.344Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 0,
+              "Title": "z_backend.cpp",
+              "DocumentMoniker": "C:\\CODE\\Engine\\code\\z_backend.cpp",
+              "RelativeDocumentMoniker": "code\\z_backend.cpp",
+              "ToolTip": "C:\\CODE\\Engine\\code\\z_backend.cpp",
+              "RelativeToolTip": "code\\z_backend.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-11-11T04:11:15.065Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "h_global_list.h",
+              "DocumentMoniker": "C:\\CODE\\Engine\\code\\h_global_list.h",
+              "RelativeDocumentMoniker": "code\\h_global_list.h",
+              "ToolTip": "C:\\CODE\\Engine\\code\\h_global_list.h",
+              "RelativeToolTip": "code\\h_global_list.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-11-13T05:23:22.082Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "h_vulkan_API.h",
+              "DocumentMoniker": "C:\\CODE\\Engine\\code\\h_vulkan_API.h",
+              "RelativeDocumentMoniker": "code\\h_vulkan_API.h",
+              "ToolTip": "C:\\CODE\\Engine\\code\\h_vulkan_API.h",
+              "RelativeToolTip": "code\\h_vulkan_API.h",
+              "ViewState": "AgIAABEBAAAAAAAAAAAkwAsBAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-11-12T11:35:19.694Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "h_mem.h",
+              "DocumentMoniker": "C:\\CODE\\Engine\\code\\h_mem.h",
+              "RelativeDocumentMoniker": "code\\h_mem.h",
+              "ToolTip": "C:\\CODE\\Engine\\code\\h_mem.h",
+              "RelativeToolTip": "code\\h_mem.h",
+              "ViewState": "AgIAACcAAAAAAAAAAAAAAAYAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-11-12T12:27:03.15Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "z_mem.cpp",
+              "DocumentMoniker": "C:\\CODE\\Engine\\code\\z_mem.cpp",
+              "RelativeDocumentMoniker": "code\\z_mem.cpp",
+              "ToolTip": "C:\\CODE\\Engine\\code\\z_mem.cpp",
+              "RelativeToolTip": "code\\z_mem.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-11-12T12:29:12.532Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
               "Title": "h_clogger.h",
               "DocumentMoniker": "C:\\CODE\\Engine\\code\\h_clogger.h",
               "RelativeDocumentMoniker": "code\\h_clogger.h",
@@ -187,31 +258,31 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "h_backend.h",
-              "DocumentMoniker": "C:\\CODE\\Engine\\code\\h_backend.h",
-              "RelativeDocumentMoniker": "code\\h_backend.h",
-              "ToolTip": "C:\\CODE\\Engine\\code\\h_backend.h",
-              "RelativeToolTip": "code\\h_backend.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAuAAAAAAAAAA==",
+              "DocumentIndex": 13,
+              "Title": "h_win32_platform.h",
+              "DocumentMoniker": "C:\\CODE\\Engine\\code\\h_win32_platform.h",
+              "RelativeDocumentMoniker": "code\\h_win32_platform.h",
+              "ToolTip": "C:\\CODE\\Engine\\code\\h_win32_platform.h",
+              "RelativeToolTip": "code\\h_win32_platform.h",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAABUAAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-11-10T14:23:45.061Z"
+              "WhenOpened": "2024-11-11T03:27:31.166Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "h_global_list.h",
-              "DocumentMoniker": "C:\\CODE\\Engine\\code\\h_global_list.h",
-              "RelativeDocumentMoniker": "code\\h_global_list.h",
-              "ToolTip": "C:\\CODE\\Engine\\code\\h_global_list.h",
-              "RelativeToolTip": "code\\h_global_list.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAcAAAAAAAAAA==",
+              "DocumentIndex": 14,
+              "Title": "h_renderer.h",
+              "DocumentMoniker": "C:\\CODE\\Engine\\code\\h_renderer.h",
+              "RelativeDocumentMoniker": "code\\h_renderer.h",
+              "ToolTip": "C:\\CODE\\Engine\\code\\h_renderer.h",
+              "RelativeToolTip": "code\\h_renderer.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAuAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-11-13T05:23:22.082Z"
+              "WhenOpened": "2024-11-05T07:42:37.031Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 15,
               "Title": "h_clock.h",
               "DocumentMoniker": "C:\\CODE\\Engine\\code\\h_clock.h",
               "RelativeDocumentMoniker": "code\\h_clock.h",
@@ -223,43 +294,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "z_win32_platform.cpp",
-              "DocumentMoniker": "C:\\CODE\\Engine\\code\\z_win32_platform.cpp",
-              "RelativeDocumentMoniker": "code\\z_win32_platform.cpp",
-              "ToolTip": "C:\\CODE\\Engine\\code\\z_win32_platform.cpp",
-              "RelativeToolTip": "code\\z_win32_platform.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAWAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-10-30T08:47:08.022Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "z_mem.cpp",
-              "DocumentMoniker": "C:\\CODE\\Engine\\code\\z_mem.cpp",
-              "RelativeDocumentMoniker": "code\\z_mem.cpp",
-              "ToolTip": "C:\\CODE\\Engine\\code\\z_mem.cpp",
-              "RelativeToolTip": "code\\z_mem.cpp",
-              "ViewState": "AgIAABsAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-11-12T12:29:12.532Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "z_global_variable.cpp",
-              "DocumentMoniker": "C:\\CODE\\Engine\\code\\z_global_variable.cpp",
-              "RelativeDocumentMoniker": "code\\z_global_variable.cpp",
-              "ToolTip": "C:\\CODE\\Engine\\code\\z_global_variable.cpp",
-              "RelativeToolTip": "code\\z_global_variable.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAtAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-11-12T12:22:02.553Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 16,
               "Title": "z_clock.cpp",
               "DocumentMoniker": "C:\\CODE\\Engine\\code\\z_clock.cpp",
               "RelativeDocumentMoniker": "code\\z_clock.cpp",
@@ -271,7 +306,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 17,
               "Title": "h_windows.h",
               "DocumentMoniker": "C:\\CODE\\Engine\\code\\h_windows.h",
               "RelativeDocumentMoniker": "code\\h_windows.h",
@@ -283,19 +318,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "z_renderer.cpp",
-              "DocumentMoniker": "C:\\CODE\\Engine\\code\\z_renderer.cpp",
-              "RelativeDocumentMoniker": "code\\z_renderer.cpp",
-              "ToolTip": "C:\\CODE\\Engine\\code\\z_renderer.cpp",
-              "RelativeToolTip": "code\\z_renderer.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-11-08T11:41:39.07Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 18,
               "Title": "h_type.h",
               "DocumentMoniker": "C:\\CODE\\Engine\\code\\h_type.h",
               "RelativeDocumentMoniker": "code\\h_type.h",

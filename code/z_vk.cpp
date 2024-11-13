@@ -1,6 +1,7 @@
 #include "h_vulkan_API.h"
 #include "h_clogger.h"
 
+//@Param:static meta func
 //::::::::::::::::::::::::::::::::::::::::::::::::::::swapchian::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 static void
 CreateSwapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u32 h)
@@ -17,12 +18,12 @@ CreateSwapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u
 			(format.colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR)) {
 			swapchain_info->surface_format = format;
 			found = TRUE;
-			std::cout << "\nfounded\n";
+			LTRACE("surface format is founded");
 			break;
 		}
 	}
 	if (!found) {
-		std::cout << "\nno founded\n";
+		LERR("surface format is not founded");
 		swapchain_info->surface_format = context->device.pdevice_swapchain_potency.surface_formats[0];
 	}
 
@@ -94,7 +95,7 @@ CreateSwapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u
 	vk_assert(vkGetSwapchainImagesKHR(context->device.logical_device, swapchain_info->swapchain_handle, &swapchain_info->image_counts, 0));
 	if (swapchain_info->image_counts > 0) {
 
-		LINFO("images_counts = " << swapchain_info->image_counts);
+		LTRACE("images_counts = " << swapchain_info->image_counts);
 		if (swapchain_info->images != nullptr)
 		{
 			free(swapchain_info->images);
@@ -127,6 +128,7 @@ CreateSwapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u
 		LERR("not support depth format");
 	}
 
+	//@Param:create depth image and image view
 	vk_create_image(
 		context,
 		VK_IMAGE_TYPE_2D,
@@ -139,12 +141,6 @@ CreateSwapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u
 		true,
 		VK_IMAGE_ASPECT_DEPTH_BIT,
 		&swapchain_info->depth_image);
-
-	vk_create_image_view(
-		context,
-		context->device.depth_format,
-		&swapchain_info->depth_image,
-		VK_IMAGE_ASPECT_DEPTH_BIT);
 
 }
 
@@ -182,7 +178,7 @@ void vk_init_extensions(vk_context* context)
 	context->device_extensions.emplace_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 	context->device_layers_extensions.reserve(3);
 
-	LINFO("extension is loaded!");
+	LTRACE("extension is loaded!");
 }
 
 
@@ -206,7 +202,7 @@ void vk_create_instance(vk_context* context)
 	
 	
 	vkCreateInstance(&instance_create_info, context->vk_allocator, &context->vk_instance);
-	LINFO("vulkan instance is created!");
+	LTRACE("vulkan instance is created!");
 }
 
 
@@ -266,11 +262,11 @@ bool vk_select_pdevice(vk_context* context)
 			context->device.physical_device = physical_device[i];
 			context->device.queue_family_info = queue_family_info;
 			
-			LINFO("physical_device : "<< i);
-			LINFO("Graphics Family index : "<<context->device.queue_family_info.graphics_family_index);
-			LINFO("present  Family index : "<<context->device.queue_family_info.present_family_index );
-			LINFO("transfer Family index : "<<context->device.queue_family_info.transfer_family_index);
-			LINFO("compute  Family index : "<<context->device.queue_family_info.compute_family_index );
+			LTRACE("physical_device : "<< i);
+			LTRACE("Graphics Family index : "<<context->device.queue_family_info.graphics_family_index);
+			LTRACE("present  Family index : "<<context->device.queue_family_info.present_family_index );
+			LTRACE("transfer Family index : "<<context->device.queue_family_info.transfer_family_index);
+			LTRACE("compute  Family index : "<<context->device.queue_family_info.compute_family_index );
 
 			////pdevice_swapchain_potency
 			vk_query_pdevice_swapchain_potency(
@@ -317,7 +313,7 @@ bool vk_pdevice_meets_required(
 	vkGetPhysicalDeviceQueueFamilyProperties(pdevice, &queuefamily_counts, 0);
 	if (queuefamily_counts != 0)
 	{
-		LINFO("queue family counts is :  "<< queuefamily_counts);
+		LTRACE("queue family counts is :  "<< queuefamily_counts);
 		queuefamily_properties = (VkQueueFamilyProperties*)alloca(queuefamily_counts * sizeof(VkQueueFamilyProperties));
 		vkGetPhysicalDeviceQueueFamilyProperties(pdevice, &queuefamily_counts, queuefamily_properties);
 	}
@@ -367,14 +363,14 @@ bool vk_pdevice_meets_required(
 		(!queue_requirements->compute || (queue_requirements->compute && queue_family_info->compute_family_index != -1)) &&
 		(!queue_requirements->transfer || (queue_requirements->transfer && queue_family_info->transfer_family_index != -1))) {
 
-		LINFO("device queuefamily is OK , data is preserve");
+		LTRACE("device queuefamily is OK , data is preserve");
 
 	}
 
 	if (queue_requirements->sampler_anisotropy && features->samplerAnisotropy)
 	{
 		
-		LINFO("device support anisotropy.");
+		LTRACE("device support anisotropy.");
 		return true;
 	}
 	else
@@ -422,7 +418,7 @@ void vk_query_pdevice_swapchain_potency(VkPhysicalDevice pdevice,
 		&device_swapchain_potency->present_modes_counts,
 		device_swapchain_potency->present_modes));
 	
-	LINFO("phisical device has the swapchian potency!");
+	LTRACE("phisical device has the swapchian potency!");
 }
 
 bool vk_query_pdevice_depth_format(vk_device* device)
@@ -560,7 +556,7 @@ void vk_create_surface(vk_context* context, win32_platform_context* win_context)
 	surface_createinfo.hwnd = win_context->win_handle;
 	vkCreateWin32SurfaceKHR(context->vk_instance, &surface_createinfo, context->vk_allocator, &context->vk_surface);
 
-	LINFO("vulkan surface is creates!");
+	LTRACE("vulkan surface is creates!");
 }
 
 
@@ -593,18 +589,18 @@ void vk_create_device(vk_context* context)
 	device_create_info.ppEnabledExtensionNames = &context->device_extensions[0];
 
 	vk_assert(vkCreateDevice(context->device.physical_device,&device_create_info,context->vk_allocator,&context->device.logical_device));
-	LINFO("logical device is created!");
+	LTRACE("logical device is created!");
 
 	vkGetDeviceQueue(context->device.logical_device, context->device.queue_family_info.graphics_family_index, 0, &context->device.graphics_queue);
 	vkGetDeviceQueue(context->device.logical_device, context->device.queue_family_info.graphics_family_index, 0, &context->device.present_queue);
 	vkGetDeviceQueue(context->device.logical_device, context->device.queue_family_info.present_family_index, 0, &context->device.transfer_queue);
-	LINFO("logical device queue handle is binded!");
+	LTRACE("logical device queue handle is binded!");
 
 	VkCommandPoolCreateInfo pool_create = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
 	pool_create.queueFamilyIndex = context->device.queue_family_info.graphics_family_index;
 	pool_create.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 	vkCreateCommandPool(context->device.logical_device, &pool_create,context->vk_allocator, &context->device.g_cmdpool);
-	LINFO("logical device command pool is created!");
+	LTRACE("logical device command pool is created!");
 }
 
 void vk_destroy_device(vk_context* context)
@@ -613,12 +609,23 @@ void vk_destroy_device(vk_context* context)
 }
 
 
+//@Param:cmdpool is created in vk_create_device function ,and destroy at this
+void vk_destory_cmdpool(vk_context* context)
+{
+	vkDestroyCommandPool(
+		context->device.logical_device,
+		context->device.g_cmdpool,
+		context->vk_allocator);
+	context->device.g_cmdpool = 0;
+}
+
+
 
 //@Param: swapchain
 void vk_create_swapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u32 h)
 {
 	CreateSwapchain(context, swapchain_info, w, h);
-	LINFO("swapchain is created!");
+	LTRACE("swapchain is created!");
 }
 
 
@@ -691,7 +698,7 @@ void vk_swapchain_present(
 	}
 	else if (result != VK_SUCCESS) {
 		
-		LERR("fail to present iamges");
+		LERR("fail to present images");
 	}
 
 	context->current_frame = (context->current_frame + 1) % swapchain_info->max_frames_in_flight;
@@ -799,7 +806,7 @@ void vk_create_renderpass(
 	
 
 	vk_assert(vkCreateRenderPass(context->device.logical_device, &create_info, context->vk_allocator, &renderpass->renderpass_handle));
-	LINFO("renderpass is created!");
+	LTRACE("renderpass is created!");
 }
 
 
@@ -1004,7 +1011,10 @@ void vk_create_fence(vk_context* context, bool create_signal, vk_fence* fence)
 
 void vk_destroy_fence(vk_context* context, vk_fence* fence)
 {
-//	todo:
+	if (fence->fence_handle) {
+		vkDestroyFence(context->device.logical_device, fence->fence_handle, context->vk_allocator);
+	}
+	fence->is_signaled = false;
 }
 
 bool vk_fence_wait(vk_context* context, vk_fence* fence, u64 time_out_ns)

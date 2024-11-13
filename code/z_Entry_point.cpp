@@ -17,7 +17,7 @@ int main()
 	LERR("ERROR " << 32 << " well");
 
 	bk_win32_init(&g_context.win32_context);
-	bk_vk_init(&g_context);
+	bk_vk_init(&g_context.vk_context, &g_context.win32_context);
 	g_running = true;
 	MSG msg = {};
 	while (g_running == true)
@@ -27,13 +27,15 @@ int main()
 			TranslateMessage(&msg);
 			DispatchMessageA(&msg);
 		}
-		////todo::input
+		//TODO:input
 
-		////todo::render
+		////TODO:render
+		bool i = bk_vk_begin_frame(&g_context.vk_context);
+		bool o = bk_vk_end_frame(&g_context.vk_context);
 	}
 
-	bk_vk_shutdown(&g_context);
-	//todo:: win32 shutdown
+	bk_vk_shutdown(&g_context.vk_context);
+	//TODO:win32 shutdown
 
 	return 0;
 }
