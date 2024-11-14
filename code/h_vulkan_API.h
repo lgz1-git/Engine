@@ -121,7 +121,7 @@ struct vk_swapchain_info
 	vk_framebuffer* framebuffer;
 
 	VkSurfaceFormatKHR surface_format;
-	u8 max_frames_in_flight;
+	u32 max_frames_in_flight;
 	VkSwapchainKHR swapchain_handle;
 	u32 image_counts;
 	//TODO::clean up
@@ -139,7 +139,7 @@ struct vk_fence {
 
 struct vk_context
 {
-
+	bool resize;
 	VkInstance vk_instance;
 	VkAllocationCallbacks *vk_allocator;
 	VkSurfaceKHR vk_surface;
@@ -253,7 +253,7 @@ void vk_swapchain_present(
 	VkQueue graphics_queue,
 	VkQueue present_queue,
 	VkSemaphore render_complete_semaphore,
-	u32 present_image_index);
+	u32 present_image_index,f32,f32);
 
 
 void vk_create_renderpass(
@@ -265,7 +265,10 @@ void vk_create_renderpass(
 
 void vk_destroy_renderpass(vk_context* context, vk_renderpass* rederpass);
 
-void vk_renderpass_begin(vk_cmdbuffer* cmdbuffer,vk_renderpass* renderpass,VkFramebuffer frame_buffer);
+void vk_renderpass_begin(
+	vk_cmdbuffer* cmdbuffer,
+	vk_renderpass* renderpass,
+	VkFramebuffer frame_buffer);
 
 void vk_renderpass_end(vk_cmdbuffer* cmdbuffer, vk_renderpass* renderpass);
 

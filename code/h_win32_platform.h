@@ -25,5 +25,4 @@ struct win32_config
 
 void create_window(win32_platform_context* context, win32_config* config);
 
-
 static LRESULT CALLBACK WindowProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam);

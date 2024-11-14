@@ -1,6 +1,6 @@
 #include "h_win32_platform.h"
 
-extern bool g_running;
+#include "h_global_list.h"
 
 void 
 create_window(win32_platform_context* context, win32_config* config)
@@ -43,6 +43,20 @@ CALLBACK WindowProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
         case WM_DESTROY: {
             LTRACE("window destory");
         }break;
+        case WM_SIZE: {
+            RECT client_react;
+            GetClientRect(wnd, &client_react);
+            int32_t width = client_react.right - client_react.left;
+            int32_t height = client_react.bottom - client_react.top;
+            g_rect_x = client_react.left;
+            g_rect_y = client_react.top;
+            g_rect_w = width;
+            g_rect_h = height;
+            LINFO("x: " << g_rect_x);
+            LINFO("y: " << g_rect_y);
+            LINFO("w: " << g_rect_w);
+            LINFO("h: " << g_rect_h);
+        }break;
         case WM_SYSKEYUP:
         case WM_SYSKEYDOWN:
         case WM_KEYUP:
@@ -53,8 +67,11 @@ CALLBACK WindowProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
         bool isdown = ((lparam >> 31 & 1) == 0);
         if (vkcode == 'W')
         {
-            if (wasdown)
+            if (wasdown) {
                 OutputDebugStringA("W: wasdown");
+                g_rect_w++;
+                g_rect_h++;
+            }
             if (isdown)
                 OutputDebugStringA("W: isdown");
         }
@@ -100,6 +117,7 @@ CALLBACK WindowProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
         return DefWindowProcA(wnd, msg, wparam, lparam);
     }
 }
+
 
 
 

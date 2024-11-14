@@ -90,26 +90,30 @@ CreateSwapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u
 
 	vk_assert(vkCreateSwapchainKHR(context->device.logical_device, &swapchain_create_info, context->vk_allocator, &swapchain_info->swapchain_handle));
 
-	context->image_index = 0;
-	context->current_frame = 0;
+	swapchain_info->image_counts = 0;
+	
 	vk_assert(vkGetSwapchainImagesKHR(context->device.logical_device, swapchain_info->swapchain_handle, &swapchain_info->image_counts, 0));
 	if (swapchain_info->image_counts > 0) {
 
 		LTRACE("images_counts = " << swapchain_info->image_counts);
-		if (swapchain_info->images != nullptr)
+		/*if (swapchain_info->images != nullptr)
 		{
 			free(swapchain_info->images);
+		}*/
+		if (swapchain_info->images == nullptr) {
+			swapchain_info->images = (VkImage*)malloc(swapchain_info->image_counts * sizeof(VkImage));
 		}
-		swapchain_info->images = (VkImage*)malloc(swapchain_info->image_counts * sizeof(VkImage));
 		vkGetSwapchainImagesKHR(context->device.logical_device, swapchain_info->swapchain_handle, &swapchain_info->image_counts, swapchain_info->images);
 	}
 
 	//views
-	if (swapchain_info->views != nullptr)
+	/*if (swapchain_info->views != nullptr)
 	{
 		free(swapchain_info->views);
+	}*/
+	if (swapchain_info->views == nullptr) {
+		swapchain_info->views = (VkImageView*)malloc(swapchain_info->image_counts * sizeof(VkImageView));
 	}
-	swapchain_info->views = (VkImageView*)malloc(swapchain_info->image_counts * sizeof(VkImageView));
 	for (u32 i = 0; i < swapchain_info->image_counts; ++i) {
 		VkImageViewCreateInfo view_info = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
 		view_info.image = swapchain_info->images[i];
@@ -147,6 +151,7 @@ CreateSwapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u
 static void
 DestroySwapchain(vk_context* context, vk_swapchain_info* swapchain_info)
 {
+	vkDeviceWaitIdle(context->device.logical_device);
 	vk_destroy_image(context, &swapchain_info->depth_image);
 	for (i32 i = 0; i < swapchain_info->image_counts; i++)
 	{
@@ -390,7 +395,9 @@ void vk_query_pdevice_swapchain_potency(VkPhysicalDevice pdevice,
 	vk_assert(vkGetPhysicalDeviceSurfaceFormatsKHR(pdevice, surface, &device_swapchain_potency->format_counts, nullptr));
 
 	if (device_swapchain_potency->format_counts > 0) {
-		device_swapchain_potency->surface_formats = (VkSurfaceFormatKHR*)malloc(device_swapchain_potency->format_counts * sizeof(VkSurfaceFormatKHR));
+		if (device_swapchain_potency->surface_formats == nullptr) {
+			device_swapchain_potency->surface_formats = (VkSurfaceFormatKHR*)malloc(device_swapchain_potency->format_counts * sizeof(VkSurfaceFormatKHR));
+		}
 		vk_assert(vkGetPhysicalDeviceSurfaceFormatsKHR(
 			pdevice,
 			surface,
@@ -678,7 +685,9 @@ void vk_swapchain_present(
 	VkQueue graphics_queue,
 	VkQueue present_queue,
 	VkSemaphore render_complete_semaphore,
-	u32 present_image_index)
+	u32 present_image_index,
+	f32 w,
+	f32 h)
 {
 	// Return the image to the swapchain for presentation.
 	VkPresentInfoKHR present_info = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
@@ -693,7 +702,7 @@ void vk_swapchain_present(
 	VkResult result = vkQueuePresentKHR(present_queue, &present_info);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
-		vk_recreate_swapchain(context, swapchain_info, context->frame_buffer_w, context->frame_buffer_h);
+		vk_recreate_swapchain(context, swapchain_info, w,h);
 
 	}
 	else if (result != VK_SUCCESS) {
@@ -723,6 +732,9 @@ void vk_create_renderpass(
 	renderpass->g = g;
 	renderpass->b = b;
 	renderpass->a = a;
+
+	renderpass->depth = depth;
+	renderpass->stencil = stencil;
 
 
 	VkSubpassDescription subpass = {};
@@ -818,8 +830,12 @@ void vk_destroy_renderpass(vk_context* context, vk_renderpass* renderpass)
 	}
 }
 
-void vk_renderpass_begin(vk_cmdbuffer* cmdbuffer, vk_renderpass* renderpass, VkFramebuffer frame_buffer)
+void vk_renderpass_begin(
+	vk_cmdbuffer* cmdbuffer,
+	vk_renderpass* renderpass,
+	VkFramebuffer frame_buffer)
 {
+
 	VkRenderPassBeginInfo begin_info = {VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
 	begin_info.renderPass = renderpass->renderpass_handle;
 	begin_info.framebuffer = frame_buffer;
@@ -828,7 +844,7 @@ void vk_renderpass_begin(vk_cmdbuffer* cmdbuffer, vk_renderpass* renderpass, VkF
 	begin_info.renderArea.offset.x = renderpass->x;
 	begin_info.renderArea.offset.y = renderpass->y;
 
-	VkClearValue clear_value[2];
+	VkClearValue clear_value[2] = {};
 	clear_value[0].color.float32[0] = renderpass->r;
 	clear_value[0].color.float32[1] = renderpass->g;
 	clear_value[0].color.float32[2] = renderpass->b;
