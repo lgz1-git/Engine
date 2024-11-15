@@ -86,14 +86,12 @@ struct vk_depth_image {
 	VkImage image_handle;
 	VkDeviceMemory memory;
 	VkImageView view;
-	u32 w;
-	u32 h;
 };
 
 
 struct vk_renderpass {
 	VkRenderPass renderpass_handle;
-	f32 x, y, w, h;
+	f32 w, h;
 	f32 r, g, b, a;
 
 	f32 depth;
@@ -104,7 +102,6 @@ struct vk_renderpass {
 
 struct vk_cmdbuffer {
 	VkCommandBuffer cmdbuffer_handle;
-
 	vk_cmdbuffer_state cmdbuffer_state;
 };
 
@@ -140,6 +137,13 @@ struct vk_fence {
 struct vk_context
 {
 	bool resize;
+
+	u32 image_index;
+	u32 current_frame;
+
+	u32 extent_w;
+	u32 extent_h;
+
 	VkInstance vk_instance;
 	VkAllocationCallbacks *vk_allocator;
 	VkSurfaceKHR vk_surface;
@@ -164,11 +168,6 @@ struct vk_context
 
 	vk_swapchain_info swapchain_info;
 
-	u32 image_index;
-	u32 current_frame;
-
-	u32 frame_buffer_w;
-	u32 frame_buffer_h;
 
 	vk_cmdbuffer* g_cmd_buffer;
 };
@@ -244,7 +243,7 @@ bool vk_swapchain_acquire_next_image_index(
 	u64 timeout_ns,
 	VkSemaphore image_available_semaphore,
 	VkFence fence,
-	u32 out_image_index);
+	u32* out_image_index);
 
 
 void vk_swapchain_present(
@@ -259,7 +258,6 @@ void vk_swapchain_present(
 void vk_create_renderpass(
 	vk_context* context,
 	vk_renderpass* renderpass,
-	f32 x, f32 y, f32 w, f32 h,
 	f32 r, f32 g, f32 b, f32 a,
 	f32 depth, u32 stencil);
 

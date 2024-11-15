@@ -14,8 +14,6 @@ int main()
 
 	bk_win32_init(&g_context.win32_context);
 	bk_get_win32_size();
-	g_old_w = g_rect_w;
-	g_old_h = g_rect_h;
 	bk_vk_init(&g_context.vk_context, &g_context.win32_context);
 	g_running = true;
 	MSG msg = {};

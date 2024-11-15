@@ -48,12 +48,8 @@ CALLBACK WindowProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
             GetClientRect(wnd, &client_react);
             int32_t width = client_react.right - client_react.left;
             int32_t height = client_react.bottom - client_react.top;
-            g_rect_x = client_react.left;
-            g_rect_y = client_react.top;
             g_rect_w = width;
             g_rect_h = height;
-            LINFO("x: " << g_rect_x);
-            LINFO("y: " << g_rect_y);
             LINFO("w: " << g_rect_w);
             LINFO("h: " << g_rect_h);
         }break;
@@ -69,8 +65,8 @@ CALLBACK WindowProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
         {
             if (wasdown) {
                 OutputDebugStringA("W: wasdown");
-                g_rect_w++;
-                g_rect_h++;
+               /* g_rect_w++;
+                g_rect_h++;*/
             }
             if (isdown)
                 OutputDebugStringA("W: isdown");

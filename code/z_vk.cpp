@@ -145,6 +145,8 @@ CreateSwapchain(vk_context* context, vk_swapchain_info* swapchain_info, u32 w, u
 		true,
 		VK_IMAGE_ASPECT_DEPTH_BIT,
 		&swapchain_info->depth_image);
+	context->extent_w = extent.width;
+	context->extent_h = extent.height;
 
 }
 
@@ -468,8 +470,6 @@ void vk_create_image(
 	VkImageAspectFlags view_aspect_flags,
 	vk_depth_image* depth_image)
 {
-	depth_image->w = w;
-	depth_image->h = h;
 
 	VkImageCreateInfo create_info = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
 	create_info.arrayLayers = 1;
@@ -655,7 +655,7 @@ bool vk_swapchain_acquire_next_image_index(
 	u64 timeout_ns,
 	VkSemaphore semaphore,
 	VkFence fence,
-	u32 next_image_index)
+	u32* next_image_index)
 {
 	VkResult result = vkAcquireNextImageKHR(
 		context->device.logical_device,
@@ -663,10 +663,10 @@ bool vk_swapchain_acquire_next_image_index(
 		timeout_ns,
 		semaphore,
 		fence,
-		&next_image_index);
-
+		next_image_index);
+	vk_assert(result);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-		vk_recreate_swapchain(context, swapchain_info, context->frame_buffer_w, context->frame_buffer_h);
+		vk_recreate_swapchain(context, swapchain_info, context->extent_w, context->extent_h);
 		return false;
 	}
 	else if (result!=VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
@@ -700,7 +700,7 @@ void vk_swapchain_present(
 	present_info.pResults = 0;
 
 	VkResult result = vkQueuePresentKHR(present_queue, &present_info);
-
+	vk_assert(result);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
 		vk_recreate_swapchain(context, swapchain_info, w,h);
 
@@ -718,16 +718,10 @@ void vk_swapchain_present(
 void vk_create_renderpass(
 	vk_context* context,
 	vk_renderpass* renderpass,
-	f32 x, f32 y, f32 w, f32 h,
 	f32 r, f32 g, f32 b, f32 a,
 	f32 depth, u32 stencil)
 
 {
-	renderpass->x = x;
-	renderpass->y = y;
-	renderpass->w = w;
-	renderpass->h = h;
-
 	renderpass->r = r;
 	renderpass->g = g;
 	renderpass->b = b;
@@ -796,7 +790,7 @@ void vk_create_renderpass(
 	subpass.pPreserveAttachments = 0;
 
 	// Render pass dependencies. TODO: make this configurable.
-	VkSubpassDependency dependency;
+	VkSubpassDependency dependency = {};
 	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
 	dependency.dstSubpass = 0;
 	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -835,14 +829,14 @@ void vk_renderpass_begin(
 	vk_renderpass* renderpass,
 	VkFramebuffer frame_buffer)
 {
-
+	
 	VkRenderPassBeginInfo begin_info = {VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
 	begin_info.renderPass = renderpass->renderpass_handle;
 	begin_info.framebuffer = frame_buffer;
 	begin_info.renderArea.extent.width = renderpass->w;
 	begin_info.renderArea.extent.height = renderpass->h;
-	begin_info.renderArea.offset.x = renderpass->x;
-	begin_info.renderArea.offset.y = renderpass->y;
+	begin_info.renderArea.offset.x = 0;
+	begin_info.renderArea.offset.y = 0;
 
 	VkClearValue clear_value[2] = {};
 	clear_value[0].color.float32[0] = renderpass->r;
