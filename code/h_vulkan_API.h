@@ -14,6 +14,7 @@
 #include <memory>
 
 #define vk_assert(p) assert(p==VK_SUCCESS)
+constexpr u32 shader_counts = 2;//TODO:
 
 struct vk_select_queuefamily
 {
@@ -132,6 +133,24 @@ struct vk_swapchain_info
 struct vk_fence {
 	VkFence fence_handle;
 	bool is_signaled;
+};
+
+struct vk_shader_stage {
+	VkShaderModule handle;
+	VkShaderModuleCreateInfo create_info;
+	VkPipelineShaderStageCreateInfo shader_stage_create_info;
+};
+
+struct vk_pipeline
+{
+	VkPipeline handle;
+	VkPipelineLayout pipeline_layout;
+};
+
+struct vk_shader {
+	vk_shader_stage stages[shader_counts];
+	vk_pipeline pipeline;
+
 };
 
 struct vk_context
@@ -322,4 +341,8 @@ bool vk_fence_wait(vk_context* context, vk_fence* fence, u64 time_out_ns);
 
 void vk_fence_reset(vk_context* context, vk_fence* fence);
 
+//1@Param:shader
 
+bool vk_create_shader(vk_context* context, vk_shader* shader);
+void vk_destroy_shader(vk_context* context, vk_shader* shader);
+void vk_use_shader(vk_context* context, vk_shader* shader);

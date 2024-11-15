@@ -42,6 +42,9 @@
     <ClCompile Include="code\z_mem.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="code\z_filesystem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code\h_windows.h">
@@ -71,9 +74,21 @@
     <ClInclude Include="code\h_global_list.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="code\h_filesystem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="vkinfo.txt" />
     <Text Include="a.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="code\s.bat">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="assert\shaders\shader.vert.glsl" />
+    <None Include="assert\shaders\shader.frag.glsl" />
+    <None Include="assert\shaders\shader_code\shader.frag.spv" />
+    <None Include="assert\shaders\shader_code\shader.vert.spv" />
   </ItemGroup>
 </Project>

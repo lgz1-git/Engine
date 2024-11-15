@@ -14,6 +14,7 @@
     <ClCompile Include="code\z_backend.cpp" />
     <ClCompile Include="code\z_clock.cpp" />
     <ClCompile Include="code\z_Entry_point.cpp" />
+    <ClCompile Include="code\z_filesystem.cpp" />
     <ClCompile Include="code\z_global_variable.cpp" />
     <ClCompile Include="code\z_mem.cpp" />
     <ClCompile Include="code\z_renderer.cpp" />
@@ -24,6 +25,7 @@
   <ItemGroup>
     <ClInclude Include="code\h_clock.h" />
     <ClInclude Include="code\h_clogger.h" />
+    <ClInclude Include="code\h_filesystem.h" />
     <ClInclude Include="code\h_global_list.h" />
     <ClInclude Include="code\h_mem.h" />
     <ClInclude Include="code\h_renderer.h" />
@@ -35,6 +37,13 @@
   <ItemGroup>
     <Text Include="a.txt" />
     <Text Include="vkinfo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assert\shaders\shader.frag.glsl" />
+    <None Include="assert\shaders\shader.vert.glsl" />
+    <None Include="assert\shaders\shader_code\shader.frag.spv" />
+    <None Include="assert\shaders\shader_code\shader.vert.spv" />
+    <None Include="code\s.bat" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

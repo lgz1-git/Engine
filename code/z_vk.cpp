@@ -1070,5 +1070,40 @@ void vk_fence_reset(vk_context* context, vk_fence* fence)
 	}
 }
 
+//1:@Param:shader
+#define BUILTIN_SHADER_NAME_OBJECT "Builtin shader" //TODO:clean up
+
+bool vk_create_shader_module(
+	vk_context* context,
+	const char* name,
+	const char* type_str,
+	VkShaderStageFlagBits flag,
+	u32 stage_index,
+	vk_shader_stage* shader_stage)
+{
+	//@TODO:
+	
+}
+
+bool vk_create_shader(vk_context* context, vk_shader* shader)
+{
+	char stage_type_str[shader_counts][5] = { "vert" , "frag" };
+	VkShaderStageFlagBits stage_type[shader_counts] = { VK_SHADER_STAGE_VERTEX_BIT,VK_SHADER_STAGE_FRAGMENT_BIT };
+	for (i32 i = 0; i < shader_counts; i++) {
+		if (!vk_create_shader_module(context, BUILTIN_SHADER_NAME_OBJECT, stage_type_str[i], stage_type[i], shader->stages)) {
+			LERR("can not create shader for: " << stage_type_str[i] << BUILTIN_SHADER_NAME_OBJECT);
+			return false;
+		}
+	}
+	//TODO:
+}
+void vk_destroy_shader(vk_context* context, vk_shader* shader)
+{
+
+}
+void vk_use_shader(vk_context* context, vk_shader* shader)
+{
+
+}
 
 
