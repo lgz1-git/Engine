@@ -86,9 +86,9 @@
     <None Include="code\s.bat">
       <Filter>源文件</Filter>
     </None>
-    <None Include="assert\shaders\shader.vert.glsl" />
-    <None Include="assert\shaders\shader.frag.glsl" />
-    <None Include="assert\shaders\shader_code\shader.frag.spv" />
-    <None Include="assert\shaders\shader_code\shader.vert.spv" />
+    <None Include="asset\shaders\builtin_shader.vert.glsl" />
+    <None Include="asset\shaders\builtin_shader.frag.glsl" />
+    <None Include="asset\shaders\shader_code\builtin_shader.frag.spv" />
+    <None Include="asset\shaders\shader_code\builtin_shader.vert.spv" />
   </ItemGroup>
 </Project>

@@ -1,5 +1,7 @@
 #include "h_vulkan_API.h"
 #include "h_clogger.h"
+#include "h_filesystem.h"
+#include <sstream>
 
 //@Param:static meta func
 //::::::::::::::::::::::::::::::::::::::::::::::::::::swapchian::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -168,7 +170,20 @@ DestroySwapchain(vk_context* context, vk_swapchain_info* swapchain_info)
 		context->vk_allocator);
 }
 //::::::::::::::::::::::::::::::::::::::::::::::::::::swapchian::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
+static i32 vk_find_memtype_index(VkPhysicalDevice device,u32 typefilter,u32 flag) {
+	VkPhysicalDeviceMemoryProperties memory_properties;
+	i32 memory_typeindex = 0;
+	vkGetPhysicalDeviceMemoryProperties(device, &memory_properties);
+	//info:why is this?
+	for (int i = 0; i < memory_properties.memoryTypeCount; i++) {
+		if (typefilter & (1 << i) && (memory_properties.memoryTypes[i].propertyFlags & flag) == flag) {
+			memory_typeindex = i;
+			break;
+		}
+		memory_typeindex = -1;
+	}
+	return memory_typeindex;
+}
 
 
 
@@ -491,18 +506,21 @@ void vk_create_image(
 	vkGetImageMemoryRequirements(context->device.logical_device, depth_image->image_handle, &memory_requirements);
 
 	//Query memory requirements.
-	VkPhysicalDeviceMemoryProperties memory_properties;
-	i32 memory_typeindex = 0;
-	vkGetPhysicalDeviceMemoryProperties(context->device.physical_device, &memory_properties);
-	//info:why is this?
-	for (int i = 0; i < memory_properties.memoryTypeCount; i++) {
-		if (memory_requirements.memoryTypeBits & (1 << i) && (memory_properties.memoryTypes[i].propertyFlags & memory_flags) == memory_flags) {
-			memory_typeindex = i;
-			break;
-		}
-		memory_typeindex = -1;
-	}
+	
+	//i32 memory_typeindex = 0;
+	//VkPhysicalDeviceMemoryProperties memory_properties;
+	//vkGetPhysicalDeviceMemoryProperties(context->device.physical_device, &memory_properties);
+	////info:why is this?
+	//for (int i = 0; i < memory_properties.memoryTypeCount; i++) {
+	//	if (memory_requirements.memoryTypeBits & (1 << i) && (memory_properties.memoryTypes[i].propertyFlags & memory_flags) == memory_flags) {
+	//		memory_typeindex = i;
+	//		break;
+	//	}
+	//	memory_typeindex = -1;
+	//}
+	
 	// Allocate memory
+	i32 memory_typeindex = vk_find_memtype_index(context->device.physical_device, memory_requirements.memoryTypeBits, memory_flags);
 	if (memory_typeindex == -1)
 	{
 		LERR("no memory type for image");
@@ -1071,18 +1089,53 @@ void vk_fence_reset(vk_context* context, vk_fence* fence)
 }
 
 //1:@Param:shader
-#define BUILTIN_SHADER_NAME_OBJECT "Builtin shader" //TODO:clean up
+#define BUILTIN_SHADER_NAME_OBJECT "builtin_shader" //TODO:clean up
 
-bool vk_create_shader_module(
-	vk_context* context,
-	const char* name,
-	const char* type_str,
-	VkShaderStageFlagBits flag,
-	u32 stage_index,
-	vk_shader_stage* shader_stage)
+static bool vk_create_shader_module(
+		vk_context* context,
+		const char* name,
+		const char* type_str,
+		VkShaderStageFlagBits flag,
+		u32 stage_index,
+		vk_shader_stage* shader_stage)
 {
-	//@TODO:
-	
+	std::stringstream stream;
+	stream << "asset/shaders/shader_code/" << name << "." << type_str << ".spv";
+	shader_stage[stage_index].create_info.sType = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
+
+	fs_file_handle handle = {};
+	if (!fs_open(stream.str().c_str(), FILE_MODE_READ, true, &handle))
+	{
+		LERR("can not read shader module: " << stream.str());
+		return false;
+	}
+
+	size_t size = 0;
+	u8* file_buf = 0;
+	if (!fs_read_all_bytes(&handle, &file_buf, &size)) {
+		LERR("can not read shader module as binary: " << stream.str());
+		return false;
+	}
+	shader_stage[stage_index].create_info.codeSize = size;
+	shader_stage[stage_index].create_info.pCode = (u32*)file_buf;
+
+	fs_close(&handle);
+
+	vk_assert(vkCreateShaderModule(
+		context->device.logical_device,
+		&shader_stage[stage_index].create_info,
+		context->vk_allocator,
+		&shader_stage[stage_index].handle));
+
+	shader_stage[stage_index].shader_stage_create_info.sType = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+	shader_stage[stage_index].shader_stage_create_info.stage = flag;
+	shader_stage[stage_index].shader_stage_create_info.module = shader_stage[stage_index].handle;
+	shader_stage[stage_index].shader_stage_create_info.pName = "main";
+
+	if (file_buf) {
+		free(file_buf);
+	}
+
 }
 
 bool vk_create_shader(vk_context* context, vk_shader* shader)
@@ -1090,20 +1143,341 @@ bool vk_create_shader(vk_context* context, vk_shader* shader)
 	char stage_type_str[shader_counts][5] = { "vert" , "frag" };
 	VkShaderStageFlagBits stage_type[shader_counts] = { VK_SHADER_STAGE_VERTEX_BIT,VK_SHADER_STAGE_FRAGMENT_BIT };
 	for (i32 i = 0; i < shader_counts; i++) {
-		if (!vk_create_shader_module(context, BUILTIN_SHADER_NAME_OBJECT, stage_type_str[i], stage_type[i], shader->stages)) {
+		if (!vk_create_shader_module(context, BUILTIN_SHADER_NAME_OBJECT, stage_type_str[i], stage_type[i], i,shader->stages)) {
 			LERR("can not create shader for: " << stage_type_str[i] << BUILTIN_SHADER_NAME_OBJECT);
 			return false;
 		}
 	}
-	//TODO:
+	//TODO:descriptors
+
+	//@Param:pipeline
+	VkViewport view = {};
+	view.x = 0.f;
+	view.y = 0.f;
+	view.width = context->extent_w;
+	view.height = context->extent_h;
+	view.minDepth = 0.f;
+	view.maxDepth = 1.f;
+	
+	VkRect2D scissor = {};
+	scissor.offset = { 0,0 };
+	scissor.extent = { context->extent_w ,context->extent_h };
+
+	u32 offest = 0;
+	const i32 attribute_count = 1;
+	VkVertexInputAttributeDescription attribute_description[attribute_count];
+
+	VkFormat format[attribute_count] = {
+		VK_FORMAT_R32G32B32_SFLOAT,
+	};
+	size_t size[attribute_count] = { 3 * sizeof(f32) };
+	for (i32 i = 0; i < attribute_count; i++) {
+		attribute_description[i].offset = offest;
+		attribute_description[i].format = format[i];
+		attribute_description[i].location = i;
+		attribute_description[i].binding = 0;
+		offest += size[i];
+	}
+
+	//TODO:descriptor set layout
+
+	//@Param:pipeline shader stages
+	VkPipelineShaderStageCreateInfo stage_create_info[shader_counts]; 
+	for (i32 i = 0; i < shader_counts; i++) {
+		stage_create_info[i].sType = shader->stages[i].shader_stage_create_info.sType;
+		stage_create_info[i] = shader->stages[i].shader_stage_create_info;
+	}
+
+	if (!vk_create_g_pipeline(
+		context,
+		&context->main_renderpass,
+		attribute_count,
+		attribute_description,
+		0,
+		0,
+		shader_counts,
+		stage_create_info,
+		view,
+		scissor,
+		false,
+		&shader->pipeline))
+	{
+		LERR("fail to load g pipeline!");
+		return false;
+	}
+	return true;
 }
 void vk_destroy_shader(vk_context* context, vk_shader* shader)
 {
+	vk_destroy_pipeline(context, &shader->pipeline);
 
+	for (i32 i = 0; i < shader_counts; i++) {
+		vkDestroyShaderModule(
+			context->device.logical_device,
+			shader->stages[i].handle,
+			context->vk_allocator);
+
+		shader->stages[i].handle = 0;
+	}
 }
 void vk_use_shader(vk_context* context, vk_shader* shader)
+{
+	//TODO:
+}
+
+bool vk_create_g_pipeline(
+	vk_context* context,
+	vk_renderpass* renderpass,
+	u32 attribute_counts,
+	VkVertexInputAttributeDescription* attributes,
+	u32 descriptors_set_layout_counts,
+	VkDescriptorSetLayout* descriptors_set_layout,
+	u32 stage_counts,
+	VkPipelineShaderStageCreateInfo* stages,
+	VkViewport viewport,
+	VkRect2D scissor,
+	bool is_wireframe,
+	vk_pipeline* pipeline)
+{
+	VkPipelineViewportStateCreateInfo view_state = { VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO };
+	view_state.pScissors						 = &scissor;
+	view_state.pViewports					     = &viewport;
+	view_state.viewportCount					 = 1;
+	view_state.scissorCount						 = 1;
+
+	VkPipelineRasterizationStateCreateInfo ras   = { VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO };
+	ras.depthClampEnable                         = false;
+	ras.rasterizerDiscardEnable                  = false;
+	ras.polygonMode				                 = is_wireframe ? VK_POLYGON_MODE_LINE : VK_POLYGON_MODE_FILL;
+	ras.lineWidth				                 = 1.f;
+	ras.cullMode			                     = VK_CULL_MODE_BACK_BIT;
+	ras.frontFace				                 = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+	ras.depthBiasClamp			                 = 0.f;
+	ras.depthBiasConstantFactor                  = 0.f;
+	ras.depthBiasEnable			                 = false;
+	ras.depthBiasSlopeFactor	                 = 0.f; 
+
+	// Multisampling.
+	VkPipelineMultisampleStateCreateInfo multisampling = { VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO };
+	multisampling.sampleShadingEnable				   = false;
+	multisampling.rasterizationSamples				   = VK_SAMPLE_COUNT_1_BIT;
+	multisampling.minSampleShading					   = 1.f;
+	multisampling.pSampleMask						   = 0;
+	multisampling.alphaToCoverageEnable				   = false;
+	multisampling.alphaToOneEnable					   = false;
+
+	// Depth and stencil testing.
+	VkPipelineDepthStencilStateCreateInfo depth_stencil = { VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO };
+	depth_stencil.depthTestEnable					    = true;
+	depth_stencil.depthWriteEnable					    = true;
+	depth_stencil.depthCompareOp					    = VK_COMPARE_OP_LESS;
+	depth_stencil.depthBoundsTestEnable				    = false;
+	depth_stencil.stencilTestEnable					    = false;
+
+	VkPipelineColorBlendAttachmentState color_blend_attachment_state = {};
+	color_blend_attachment_state.blendEnable		 = true;
+	color_blend_attachment_state.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+	color_blend_attachment_state.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+	color_blend_attachment_state.colorBlendOp		 = VK_BLEND_OP_ADD;
+	color_blend_attachment_state.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+	color_blend_attachment_state.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+	color_blend_attachment_state.alphaBlendOp		 = VK_BLEND_OP_ADD;
+	color_blend_attachment_state.colorWriteMask		 = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+												       VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+
+
+
+	VkPipelineColorBlendStateCreateInfo color_blend_state_create_info = { VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO };
+	color_blend_state_create_info.attachmentCount = 1;
+	color_blend_state_create_info.logicOpEnable = false;
+	color_blend_state_create_info.logicOp = VK_LOGIC_OP_COPY;
+	color_blend_state_create_info.pAttachments = &color_blend_attachment_state;
+
+	// Dynamic state
+	const u32 dynamic_state_count = 3;
+	VkDynamicState dynamic_states[dynamic_state_count] = {
+		VK_DYNAMIC_STATE_VIEWPORT,
+		VK_DYNAMIC_STATE_SCISSOR,
+		VK_DYNAMIC_STATE_LINE_WIDTH };
+
+	VkPipelineDynamicStateCreateInfo dynamic_states_create_info = { VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO };
+	dynamic_states_create_info.dynamicStateCount = dynamic_state_count;
+	dynamic_states_create_info.pDynamicStates = dynamic_states;
+
+	//@Param:vertex description
+	VkVertexInputBindingDescription binding_description = {};
+	binding_description.binding = 0;
+	binding_description.stride = 3*sizeof(f32);
+	binding_description.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+	VkPipelineVertexInputStateCreateInfo vertex_input_info = { VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
+	vertex_input_info.vertexBindingDescriptionCount = 1;
+	vertex_input_info.pVertexBindingDescriptions = &binding_description;
+	vertex_input_info.vertexAttributeDescriptionCount = attribute_counts;
+	vertex_input_info.pVertexAttributeDescriptions = attributes;
+
+	VkPipelineInputAssemblyStateCreateInfo input_assembly = { VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO };
+	input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	input_assembly.primitiveRestartEnable = false;
+
+	//@Param:pipeline layout
+	VkPipelineLayoutCreateInfo layout = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
+	layout.setLayoutCount = descriptors_set_layout_counts;
+	layout.pSetLayouts = descriptors_set_layout;
+
+	vk_assert(vkCreatePipelineLayout(
+		context->device.logical_device,
+		&layout,
+		context->vk_allocator,
+		&pipeline->pipeline_layout));
+
+	VkGraphicsPipelineCreateInfo pipeline_create_info = { VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO };
+	pipeline_create_info.stageCount = stage_counts;
+	pipeline_create_info.pStages = stages;
+	pipeline_create_info.pVertexInputState = &vertex_input_info;
+	pipeline_create_info.pInputAssemblyState = &input_assembly;
+
+	pipeline_create_info.pViewportState = &view_state;
+	pipeline_create_info.pColorBlendState = &color_blend_state_create_info;
+	pipeline_create_info.pDepthStencilState = &depth_stencil;
+	pipeline_create_info.pDynamicState = &dynamic_states_create_info;
+	pipeline_create_info.pMultisampleState = &multisampling;
+	pipeline_create_info.pRasterizationState = &ras;
+	pipeline_create_info.pTessellationState = 0;
+
+	pipeline_create_info.layout = pipeline->pipeline_layout;
+
+	pipeline_create_info.renderPass = renderpass->renderpass_handle;
+	pipeline_create_info.subpass = 0;
+	pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
+	pipeline_create_info.basePipelineIndex = -1;
+
+	vk_assert(vkCreateGraphicsPipelines(
+		context->device.logical_device,
+		VK_NULL_HANDLE,
+		1,
+		&pipeline_create_info,
+		context->vk_allocator,
+		&pipeline->handle));
+	return true;
+}
+
+void vk_destroy_pipeline(vk_context* context, vk_pipeline* pipeline)
+{
+	if (pipeline->handle) {
+		vkDestroyPipeline(context->device.logical_device, pipeline->handle, context->vk_allocator);
+		pipeline->handle = 0;
+	}
+	if (pipeline->pipeline_layout)
+	{
+		vkDestroyPipelineLayout(context->device.logical_device, pipeline->pipeline_layout, context->vk_allocator);
+		pipeline->pipeline_layout = 0;
+	}
+}
+
+void vk_bind_pipeline(vk_cmdbuffer* cmdbuf, VkPipelineBindPoint bindpoint, vk_pipeline* pipeline)
+{
+	vkCmdBindPipeline(cmdbuf->cmdbuffer_handle, bindpoint, pipeline->handle);
+}
+
+
+
+//1 @Param:buffer
+
+bool vk_create_buffer(
+	vk_context* context,
+	size_t size,
+	VkBufferUsageFlagBits usage,
+	u32 mem_flag,
+	bool bind_on_create,
+	vk_buffer* buf)
+{
+	buf->usage = usage;
+	buf->total_size = size;
+	buf->mem_property_flags = mem_flag;
+
+	VkBufferCreateInfo info = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
+	info.size = size;
+	info.usage = usage;
+	info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	vk_assert(vkCreateBuffer(context->device.logical_device, &info, context->vk_allocator, &buf->handle));
+
+	VkMemoryRequirements requirements = {};
+	vkGetBufferMemoryRequirements(context->device.logical_device, buf->handle, &requirements);
+	buf->mem_index = vk_find_memtype_index(context->device.physical_device, requirements.memoryTypeBits, mem_flag);
+	if (buf->mem_index == -1) {
+		LERR("memory type not found!");
+		return false;
+	}
+
+	VkMemoryAllocateInfo alloc_info = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
+	alloc_info.allocationSize = size;
+	alloc_info.memoryTypeIndex = buf->mem_index;
+
+	vk_assert(vkAllocateMemory(context->device.logical_device, &alloc_info, context->vk_allocator, &buf->memory));
+
+	if (bind_on_create) {
+		vk_bind_buffer(context, buf, 0);
+	}
+
+	return true;
+}
+
+void vk_destroy_buffer(vk_context* context, vk_buffer* buf)
+{
+	if (buf->memory) {
+		vkFreeMemory(context->device.logical_device, buf->memory, context->vk_allocator);
+		buf->memory = 0;
+	}
+	if (buf->handle) {
+		vkDestroyBuffer(context->device.logical_device, buf->handle, context->vk_allocator);
+		buf->handle = 0;
+	}
+	buf->total_size = 0;
+	buf->is_locked = false;
+}
+
+void* vk_lock_buffer_mem(vk_context* context, vk_buffer* buf, size_t offest, size_t size, u32 flags)
+{
+	return NULL;
+}
+
+void vk_unlock_buffer_mem(vk_context* context, vk_buffer* buf)
 {
 
 }
 
+void vk_buffer_load_data(vk_context* context, vk_buffer* buf, size_t offest, size_t size, u32 flags, const void* data)
+{
 
+}
+
+void vk_copy_buffer(
+	vk_context* context,
+	VkCommandPool pool,
+	VkFence fence,
+	VkQueue queue,
+	VkBuffer src,
+	size_t offest,
+	VkBuffer dest,
+	size_t dest_offest,
+	size_t szie)
+{
+
+}
+
+void vk_resize_buffer(
+	vk_context* context,
+	VkCommandPool pool,
+	vk_buffer* buf,
+	VkQueue queue,
+	size_t new_size)
+{
+
+}
+
+void vk_bind_buffer(vk_context* context, vk_buffer* buf, size_t offest)
+{
+
+}

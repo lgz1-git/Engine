@@ -13,7 +13,7 @@ int main()
 	global_variable_init();
 
 	bk_win32_init(&g_context.win32_context);
-	bk_get_win32_size();
+	bk_win32_get_size();
 	bk_vk_init(&g_context.vk_context, &g_context.win32_context);
 	g_running = true;
 	MSG msg = {};

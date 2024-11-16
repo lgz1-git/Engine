@@ -43,6 +43,7 @@ enum vk_cmdbuffer_state {
 	CMD_SUBMITTED,
 	CMD_NOT_ALLOCATED
 };
+
 struct vk_pdevice_queue_requirements
 {
 	//queue requirements
@@ -153,6 +154,16 @@ struct vk_shader {
 
 };
 
+struct vk_buffer {
+	size_t total_size;
+	VkBuffer handle;
+	VkBufferUsageFlagBits usage;
+	bool is_locked;
+	VkDeviceMemory memory;
+	i32 mem_index;
+	u32 mem_property_flags;
+};
+
 struct vk_context
 {
 	bool resize;
@@ -189,6 +200,8 @@ struct vk_context
 
 
 	vk_cmdbuffer* g_cmd_buffer;
+
+	vk_shader shader;
 };
 
 
@@ -341,8 +354,72 @@ bool vk_fence_wait(vk_context* context, vk_fence* fence, u64 time_out_ns);
 
 void vk_fence_reset(vk_context* context, vk_fence* fence);
 
-//1@Param:shader
+
+//1 @Param:shader
+static bool vk_create_shader_module(
+	vk_context* context,
+	const char* name,
+	const char* type_str,
+	VkShaderStageFlagBits flag,
+	u32 stage_index,
+	vk_shader_stage* shader_stage);//@Param: called by vk_create_shader
 
 bool vk_create_shader(vk_context* context, vk_shader* shader);
 void vk_destroy_shader(vk_context* context, vk_shader* shader);
 void vk_use_shader(vk_context* context, vk_shader* shader);
+
+
+//1 @Param:graphics pipeline
+bool vk_create_g_pipeline(
+	vk_context* context,
+	vk_renderpass* renderpass,
+	u32 attribute_counts,
+	VkVertexInputAttributeDescription* attributes,
+	u32 descriptors_set_layout_counts,
+	VkDescriptorSetLayout* descriptors_set_layout,
+	u32 stage_counts,
+	VkPipelineShaderStageCreateInfo* stages,
+	VkViewport viewport,
+	VkRect2D scissor,
+	bool is_wireframe,
+	vk_pipeline* pipeline);
+
+void vk_destroy_pipeline(vk_context* context, vk_pipeline* pipeline);
+
+void vk_bind_pipeline(vk_cmdbuffer* cmdbuf, VkPipelineBindPoint bindpoint, vk_pipeline* pipeline);
+
+bool vk_create_buffer(
+	vk_context* context,
+	size_t size,
+	VkBufferUsageFlagBits usage,
+	u32 mem_flag,
+	bool bind_on_create,
+	vk_buffer* buf);
+
+void vk_destroy_buffer(vk_context* context, vk_buffer* buf);
+
+void* vk_lock_buffer_mem(vk_context* context, vk_buffer* buf, size_t offest, size_t size, u32 flags);
+
+void vk_unlock_buffer_mem(vk_context* context, vk_buffer* buf);
+
+void vk_buffer_load_data(vk_context* context, vk_buffer* buf, size_t offest, size_t size, u32 flags, const void* data);
+
+void vk_copy_buffer(
+	vk_context* context,
+	VkCommandPool pool,
+	VkFence fence,
+	VkQueue queue,
+	VkBuffer src,
+	size_t offest,
+	VkBuffer dest,
+	size_t dest_offest,
+	size_t szie);
+
+void vk_resize_buffer(
+	vk_context* context,
+	VkCommandPool pool,
+	vk_buffer* buf,
+	VkQueue queue,
+	size_t new_size);
+
+void vk_bind_buffer(vk_context* context, vk_buffer* buf, size_t offest);

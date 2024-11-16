@@ -65,7 +65,7 @@ CALLBACK WindowProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
         {
             if (wasdown) {
                 OutputDebugStringA("W: wasdown");
-               /* g_rect_w++;
+                /*g_rect_w++;
                 g_rect_h++;*/
             }
             if (isdown)
