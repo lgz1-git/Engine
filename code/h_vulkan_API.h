@@ -182,6 +182,9 @@ struct vk_context
 	//renderpass
 	vk_renderpass main_renderpass;
 
+	vk_buffer vertex_buffer;
+	vk_buffer index_buffer;
+
 	//signal
 	VkSemaphore* image_available_semphores;
 	VkSemaphore* queue_complete_semphores;
@@ -415,7 +418,7 @@ void vk_copy_buffer(
 	size_t dest_offest,
 	size_t szie);
 
-void vk_resize_buffer(
+bool vk_resize_buffer(
 	vk_context* context,
 	VkCommandPool pool,
 	vk_buffer* buf,

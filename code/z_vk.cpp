@@ -1412,7 +1412,7 @@ bool vk_create_buffer(
 	}
 
 	VkMemoryAllocateInfo alloc_info = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
-	alloc_info.allocationSize = size;
+	alloc_info.allocationSize = requirements.size;
 	alloc_info.memoryTypeIndex = buf->mem_index;
 
 	vk_assert(vkAllocateMemory(context->device.logical_device, &alloc_info, context->vk_allocator, &buf->memory));
@@ -1440,17 +1440,22 @@ void vk_destroy_buffer(vk_context* context, vk_buffer* buf)
 
 void* vk_lock_buffer_mem(vk_context* context, vk_buffer* buf, size_t offest, size_t size, u32 flags)
 {
-	return NULL;
+	void* data;
+	vk_assert(vkMapMemory(context->device.logical_device, buf->memory, offest, size, flags, &data));
+	return data;
 }
 
 void vk_unlock_buffer_mem(vk_context* context, vk_buffer* buf)
 {
-
+	vkUnmapMemory(context->device.logical_device, buf->memory);
 }
 
 void vk_buffer_load_data(vk_context* context, vk_buffer* buf, size_t offest, size_t size, u32 flags, const void* data)
 {
-
+	void* data_ptr;
+	vk_assert(vkMapMemory(context->device.logical_device, buf->memory, offest, size, flags, &data_ptr));
+	memcpy(data_ptr, data, size);
+	vkUnmapMemory(context->device.logical_device, buf->memory);
 }
 
 void vk_copy_buffer(
@@ -1462,22 +1467,70 @@ void vk_copy_buffer(
 	size_t offest,
 	VkBuffer dest,
 	size_t dest_offest,
-	size_t szie)
+	size_t size)
 {
+	vk_cmdbuffer temp_cmdbuf;
+	vk_cmdbuffer_allocate_and_begin_single_use(context, pool, &temp_cmdbuf);
 
+	VkBufferCopy copy_region;
+	copy_region.dstOffset = dest_offest;
+	copy_region.srcOffset = offest;
+	copy_region.size = size;
+
+	vkCmdCopyBuffer(temp_cmdbuf.cmdbuffer_handle, src, dest, 1, &copy_region);
+
+	vk_cmdbuffer_free_and_end_single_use(context, pool, &temp_cmdbuf, queue);
 }
 
-void vk_resize_buffer(
+bool vk_resize_buffer(
 	vk_context* context,
 	VkCommandPool pool,
 	vk_buffer* buf,
 	VkQueue queue,
 	size_t new_size)
 {
+	VkBufferCreateInfo info = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
+	info.size = new_size;
+	info.usage = buf->usage;
+	info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	
+	VkBuffer new_buf = {};
+	vk_assert(vkCreateBuffer(context->device.logical_device, &info, context->vk_allocator, &new_buf));
 
+	VkMemoryRequirements requirements = {};
+	vkGetBufferMemoryRequirements(context->device.logical_device, new_buf, &requirements);
+
+	
+	VkMemoryAllocateInfo alloc_info = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
+	alloc_info.allocationSize = requirements.size;
+	alloc_info.memoryTypeIndex = buf->mem_index;
+
+
+	VkDeviceMemory mem = {};
+	vk_assert(vkAllocateMemory(context->device.logical_device, &alloc_info, context->vk_allocator, &mem));
+
+	vk_assert(vkBindBufferMemory(context->device.logical_device, new_buf, mem, 0));
+
+	vk_copy_buffer(context, pool, 0, queue, buf->handle, 0, new_buf, 0, buf->total_size);
+
+	vkDeviceWaitIdle((context->device.logical_device);
+
+	if (buf->memory) {
+		vkFreeMemory(context->device.logical_device, buf->memory, context->vk_allocator);
+		buf->memory = 0;
+	}
+	if (buf->handle) {
+		vkDestroyBuffer(context->device.logical_device, buf->handle, context->vk_allocator);
+		buf->handle = 0;
+	}
+	buf->total_size = new_size;
+	buf->memory = mem;
+	buf->handle = new_buf;
+
+	return true;
 }
 
 void vk_bind_buffer(vk_context* context, vk_buffer* buf, size_t offest)
 {
-
+	vk_assert(vkBindBufferMemory(context->device.logical_device, buf->handle, buf->memory, offest));
 }
