@@ -151,13 +151,12 @@ struct vk_pipeline
 struct vk_shader {
 	vk_shader_stage stages[shader_counts];
 	vk_pipeline pipeline;
-
 };
 
 struct vk_buffer {
 	size_t total_size;
 	VkBuffer handle;
-	VkBufferUsageFlagBits usage;
+	VkBufferUsageFlags usage;
 	bool is_locked;
 	VkDeviceMemory memory;
 	i32 mem_index;
@@ -173,6 +172,9 @@ struct vk_context
 
 	u32 extent_w;
 	u32 extent_h;
+
+	u64 geometry_vertex_offest;
+	u64 geometry_index_offest;
 
 	VkInstance vk_instance;
 	VkAllocationCallbacks *vk_allocator;
@@ -394,7 +396,7 @@ void vk_bind_pipeline(vk_cmdbuffer* cmdbuf, VkPipelineBindPoint bindpoint, vk_pi
 bool vk_create_buffer(
 	vk_context* context,
 	size_t size,
-	VkBufferUsageFlagBits usage,
+	VkBufferUsageFlags usage,
 	u32 mem_flag,
 	bool bind_on_create,
 	vk_buffer* buf);

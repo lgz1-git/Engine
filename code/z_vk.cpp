@@ -1,6 +1,7 @@
 #include "h_vulkan_API.h"
 #include "h_clogger.h"
 #include "h_filesystem.h"
+#include "h_math.h"
 #include <sstream>
 
 //@Param:static meta func
@@ -1222,7 +1223,8 @@ void vk_destroy_shader(vk_context* context, vk_shader* shader)
 }
 void vk_use_shader(vk_context* context, vk_shader* shader)
 {
-	//TODO:
+	u32 image_index = context->image_index;
+	vk_bind_pipeline(&context->g_cmd_buffer[image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, &shader->pipeline);
 }
 
 bool vk_create_g_pipeline(
@@ -1307,7 +1309,7 @@ bool vk_create_g_pipeline(
 	//@Param:vertex description
 	VkVertexInputBindingDescription binding_description = {};
 	binding_description.binding = 0;
-	binding_description.stride = 3*sizeof(f32);
+	binding_description.stride = sizeof(vert_3D);
 	binding_description.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
 	VkPipelineVertexInputStateCreateInfo vertex_input_info = { VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
@@ -1387,7 +1389,7 @@ void vk_bind_pipeline(vk_cmdbuffer* cmdbuf, VkPipelineBindPoint bindpoint, vk_pi
 bool vk_create_buffer(
 	vk_context* context,
 	size_t size,
-	VkBufferUsageFlagBits usage,
+	VkBufferUsageFlags usage,
 	u32 mem_flag,
 	bool bind_on_create,
 	vk_buffer* buf)
@@ -1513,7 +1515,7 @@ bool vk_resize_buffer(
 
 	vk_copy_buffer(context, pool, 0, queue, buf->handle, 0, new_buf, 0, buf->total_size);
 
-	vkDeviceWaitIdle((context->device.logical_device);
+	vkDeviceWaitIdle((context->device.logical_device));
 
 	if (buf->memory) {
 		vkFreeMemory(context->device.logical_device, buf->memory, context->vk_allocator);

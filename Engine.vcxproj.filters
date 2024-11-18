@@ -77,6 +77,9 @@
     <ClInclude Include="code\h_filesystem.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="code\h_math.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="vkinfo.txt" />
@@ -86,9 +89,5 @@
     <None Include="code\s.bat">
       <Filter>源文件</Filter>
     </None>
-    <None Include="asset\shaders\builtin_shader.vert.glsl" />
-    <None Include="asset\shaders\builtin_shader.frag.glsl" />
-    <None Include="asset\shaders\shader_code\builtin_shader.frag.spv" />
-    <None Include="asset\shaders\shader_code\builtin_shader.vert.spv" />
   </ItemGroup>
 </Project>
