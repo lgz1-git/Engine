@@ -4,6 +4,7 @@
 #include "h_math.h"
 #include <sstream>
 
+
 //@Param:static meta func
 //::::::::::::::::::::::::::::::::::::::::::::::::::::swapchian::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 static void
@@ -199,6 +200,7 @@ void vk_init_extensions(vk_context* context)
 	context->device_extensions.reserve(3);
 	context->device_extensions.emplace_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 	context->device_extensions.emplace_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
+
 	context->device_layers_extensions.reserve(3);
 
 	LTRACE("extension is loaded!");
@@ -611,7 +613,7 @@ void vk_create_device(vk_context* context)
 	VkPhysicalDeviceFeatures enable_featrues = {};
 	enable_featrues.samplerAnisotropy = true;
 	device_create_info.pEnabledFeatures = &enable_featrues;
-	device_create_info.enabledExtensionCount = 1;
+	device_create_info.enabledExtensionCount = context->device_extensions.size();
 	device_create_info.ppEnabledExtensionNames = &context->device_extensions[0];
 
 	vk_assert(vkCreateDevice(context->device.physical_device,&device_create_info,context->vk_allocator,&context->device.logical_device));
@@ -1101,7 +1103,7 @@ static bool vk_create_shader_module(
 		vk_shader_stage* shader_stage)
 {
 	std::stringstream stream;
-	stream << "asset/shaders/shader_code/" << name << "." << type_str << ".spv";
+	stream << "C:/CODE/Engine/asset/shaders/shader_code/" << name << "." << type_str << ".spv";
 	shader_stage[stage_index].create_info.sType = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
 
 	fs_file_handle handle = {};
@@ -1149,14 +1151,46 @@ bool vk_create_shader(vk_context* context, vk_shader* shader)
 			return false;
 		}
 	}
-	//TODO:descriptors
+	//TODO:gloabal descriptors
+	VkDescriptorSetLayoutBinding guo_layout_bind;
+	guo_layout_bind.binding = 0;
+	guo_layout_bind.descriptorCount = 1;
+	guo_layout_bind.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	guo_layout_bind.pImmutableSamplers = 0;
+	guo_layout_bind.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+	VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
+	descriptor_set_layout_create_info.bindingCount = 1;
+	descriptor_set_layout_create_info.pBindings = &guo_layout_bind;
+
+	vk_assert(vkCreateDescriptorSetLayout(
+		context->device.logical_device,
+		&descriptor_set_layout_create_info,
+		context->vk_allocator,
+		&shader->global_descriptor_set_layout));
+
+	VkDescriptorPoolSize pool_size;
+	pool_size.descriptorCount = context->swapchain_info.image_counts;
+	pool_size.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
+	VkDescriptorPoolCreateInfo pool_create_info = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
+	pool_create_info.maxSets = context->swapchain_info.image_counts;
+	pool_create_info.poolSizeCount = 1;
+	pool_create_info.pPoolSizes = &pool_size;
+
+	vk_assert(vkCreateDescriptorPool(
+		context->device.logical_device,
+		&pool_create_info,
+		context->vk_allocator,
+		&shader->global_descriptor_pool));
+
 
 	//@Param:pipeline
 	VkViewport view = {};
 	view.x = 0.f;
-	view.y = 0.f;
+	view.y = context->extent_h;
 	view.width = context->extent_w;
-	view.height = context->extent_h;
+	view.height = -(f32)context->extent_h;
 	view.minDepth = 0.f;
 	view.maxDepth = 1.f;
 	
@@ -1181,6 +1215,8 @@ bool vk_create_shader(vk_context* context, vk_shader* shader)
 	}
 
 	//TODO:descriptor set layout
+	const u32 descriptor_set_layout_counts = 1;
+	VkDescriptorSetLayout descriptor_set_layout[1] = { shader->global_descriptor_set_layout };
 
 	//@Param:pipeline shader stages
 	VkPipelineShaderStageCreateInfo stage_create_info[shader_counts]; 
@@ -1194,8 +1230,8 @@ bool vk_create_shader(vk_context* context, vk_shader* shader)
 		&context->main_renderpass,
 		attribute_count,
 		attribute_description,
-		0,
-		0,
+		descriptor_set_layout_counts,
+		descriptor_set_layout,
 		shader_counts,
 		stage_create_info,
 		view,
@@ -1206,15 +1242,58 @@ bool vk_create_shader(vk_context* context, vk_shader* shader)
 		LERR("fail to load g pipeline!");
 		return false;
 	}
+
+	//@Param:create uniform buffer
+	if (!vk_create_buffer(
+		context,
+		sizeof(gloabal_uniform_object),
+		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_DEVICE_COHERENT_BIT_AMD,
+		true,
+		&shader->global_ubo)) {
+		LERR("fail to create uniform buffer!");
+		return false;
+	}
+
+	VkDescriptorSetLayout layout[3] = {
+		shader->global_descriptor_set_layout,
+		shader->global_descriptor_set_layout,
+		shader->global_descriptor_set_layout
+	};
+
+	VkDescriptorSetAllocateInfo alloc_info = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
+	alloc_info.descriptorPool = shader->global_descriptor_pool;
+	alloc_info.descriptorSetCount = 1;
+	alloc_info.descriptorSetCount = 3;
+	alloc_info.pSetLayouts = layout;
+
+	vk_assert(vkAllocateDescriptorSets(
+		context->device.logical_device,
+		&alloc_info,
+		shader->global_descriptor_set));
+
 	return true;
 }
 void vk_destroy_shader(vk_context* context, vk_shader* shader)
 {
+	VkDevice device = context->device.logical_device;
+
+	//@Param:destroy uniform buffer
+	vk_destroy_buffer(context, &shader->global_ubo);
+
+	//@Param:destroy pipeline
 	vk_destroy_pipeline(context, &shader->pipeline);
 
+	//@Param:destroy descriptor pool
+	vkDestroyDescriptorPool(device, shader->global_descriptor_pool, context->vk_allocator);
+
+	//@Param:destroy descriptor set layout
+	vkDestroyDescriptorSetLayout(device, shader->global_descriptor_set_layout, context->vk_allocator);
+
+	//@Param:destroy shader
 	for (i32 i = 0; i < shader_counts; i++) {
 		vkDestroyShaderModule(
-			context->device.logical_device,
+			device,
 			shader->stages[i].handle,
 			context->vk_allocator);
 
@@ -1382,7 +1461,52 @@ void vk_bind_pipeline(vk_cmdbuffer* cmdbuf, VkPipelineBindPoint bindpoint, vk_pi
 	vkCmdBindPipeline(cmdbuf->cmdbuffer_handle, bindpoint, pipeline->handle);
 }
 
+void vk_shader_update_global_state(vk_context* context, vk_shader* shader)
+{
+	u32 image_index = context->swapchain_info.image_counts;
+	VkCommandBuffer cmdbuffer = context->g_cmd_buffer[image_index].cmdbuffer_handle;
+	VkDescriptorSet global_descriptor = shader->global_descriptor_set[image_index];
 
+	vkCmdBindDescriptorSets(
+		cmdbuffer,
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		shader->pipeline.pipeline_layout,
+		0,
+		1,
+		shader->global_descriptor_set,
+		0,
+		0);
+
+	u32 range = sizeof(gloabal_uniform_object);
+	u64 offest = 0;
+	vk_buffer_load_data(
+		context,
+		&shader->global_ubo,
+		offest,
+		range,
+		0,
+		&shader->global_uo);
+
+	VkDescriptorBufferInfo bufinfo = {};
+	bufinfo.buffer = shader->global_ubo.handle;
+	bufinfo.offset = offest;
+	bufinfo.range = range;
+
+	VkWriteDescriptorSet write = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+	write.dstSet = shader->global_descriptor_set[image_index];
+	write.dstBinding = 0;
+	write.dstArrayElement = 0;
+	write.pBufferInfo = &bufinfo;
+	write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	write.descriptorCount = 1;
+
+	vkUpdateDescriptorSets(
+		context->device.logical_device,
+		1,
+		&write,
+		0,
+		0);
+}
 
 //1 @Param:buffer
 

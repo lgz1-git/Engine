@@ -40,6 +40,10 @@
     <Text Include="vkinfo.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="asset\shaders\builtin_shader.frag.glsl" />
+    <None Include="asset\shaders\builtin_shader.vert.glsl" />
+    <None Include="asset\shaders\shader_code\builtin_shader.frag.spv" />
+    <None Include="asset\shaders\shader_code\builtin_shader.vert.spv" />
     <None Include="code\s.bat" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

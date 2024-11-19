@@ -6,6 +6,7 @@
 #endif
 
 #include "h_type.h"
+#include "h_math.h"
 
 #include <assert.h>
 #include <vector>
@@ -130,6 +131,12 @@ struct vk_swapchain_info
 	vk_depth_image depth_image;
 };
 
+struct gloabal_uniform_object {
+	mat4 projection;
+	mat4 view;
+	mat4 temp1;
+	mat4 temp2;
+};
 
 struct vk_fence {
 	VkFence fence_handle;
@@ -148,10 +155,6 @@ struct vk_pipeline
 	VkPipelineLayout pipeline_layout;
 };
 
-struct vk_shader {
-	vk_shader_stage stages[shader_counts];
-	vk_pipeline pipeline;
-};
 
 struct vk_buffer {
 	size_t total_size;
@@ -163,19 +166,28 @@ struct vk_buffer {
 	u32 mem_property_flags;
 };
 
+struct vk_shader {
+	vk_shader_stage stages[shader_counts];
+
+	VkDescriptorPool global_descriptor_pool;
+	VkDescriptorSetLayout  global_descriptor_set_layout;
+
+	VkDescriptorSet global_descriptor_set[3];
+	gloabal_uniform_object global_uo;
+	vk_buffer global_ubo;
+
+	vk_pipeline pipeline;
+};
+
 struct vk_context
 {
 	bool resize;
-
 	u32 image_index;
 	u32 current_frame;
-
 	u32 extent_w;
 	u32 extent_h;
-
 	u64 geometry_vertex_offest;
 	u64 geometry_index_offest;
-
 	VkInstance vk_instance;
 	VkAllocationCallbacks *vk_allocator;
 	VkSurfaceKHR vk_surface;
@@ -200,12 +212,8 @@ struct vk_context
 	std::vector<const char* > device_extensions;
 	std::vector<const char* > device_layers_extensions;
 
-
 	vk_swapchain_info swapchain_info;
-
-
 	vk_cmdbuffer* g_cmd_buffer;
-
 	vk_shader shader;
 };
 
@@ -372,6 +380,7 @@ static bool vk_create_shader_module(
 bool vk_create_shader(vk_context* context, vk_shader* shader);
 void vk_destroy_shader(vk_context* context, vk_shader* shader);
 void vk_use_shader(vk_context* context, vk_shader* shader);
+void vk_shader_update_global_state(vk_context* context, vk_shader* shader);
 
 
 //1 @Param:graphics pipeline
