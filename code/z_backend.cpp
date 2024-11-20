@@ -390,14 +390,32 @@ bk_vk_begin_frame(vk_context* context)
 		&context->main_renderpass, 
 		context->swapchain_info.framebuffer[context->image_index].framebuffer_handle);
 
+
+	return true;
+}
+
+void bk_vk_update_global_state(
+	vk_context* context,
+	glm::mat4 projection, 
+	glm::mat4 view, 
+	glm::vec3 view_pos, 
+	glm::vec4 ambient_colour, 
+	i32 mode)
+{
+	vk_cmdbuffer* cmdbuffer = &context->g_cmd_buffer[context->image_index];
+
+	vk_use_shader(context, &context->shader);
+	context->shader.global_uo.projection = projection;
+	context->shader.global_uo.view = view;
+
+	vk_shader_update_global_state(context, &context->shader);
+
 	vk_use_shader(context, &context->shader);
 	VkDeviceSize offest[1] = { 0 };
 	vkCmdBindVertexBuffers(cmdbuffer->cmdbuffer_handle, 0, 1, &context->vertex_buffer.handle, offest);
 	vkCmdBindIndexBuffer(cmdbuffer->cmdbuffer_handle, context->index_buffer.handle, 0, VK_INDEX_TYPE_UINT32);
 
 	vkCmdDrawIndexed(cmdbuffer->cmdbuffer_handle, 6, 1, 0, 0, 0);
-
-	return true;
 }
 
 bool 

@@ -14,6 +14,8 @@
 #include <string_view>
 #include <memory>
 
+#include "glm.hpp"
+
 #define vk_assert(p) assert(p==VK_SUCCESS)
 constexpr u32 shader_counts = 2;//TODO:
 
@@ -132,10 +134,10 @@ struct vk_swapchain_info
 };
 
 struct gloabal_uniform_object {
-	mat4 projection;
-	mat4 view;
-	mat4 temp1;
-	mat4 temp2;
+	glm::mat4 projection;
+	glm::mat4 view;
+	glm::mat4 temp1;
+	glm::mat4 temp2;
 };
 
 struct vk_fence {

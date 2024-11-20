@@ -1248,7 +1248,7 @@ bool vk_create_shader(vk_context* context, vk_shader* shader)
 		context,
 		sizeof(gloabal_uniform_object),
 		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_DEVICE_COHERENT_BIT_AMD,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 		true,
 		&shader->global_ubo)) {
 		LERR("fail to create uniform buffer!");
@@ -1463,7 +1463,7 @@ void vk_bind_pipeline(vk_cmdbuffer* cmdbuf, VkPipelineBindPoint bindpoint, vk_pi
 
 void vk_shader_update_global_state(vk_context* context, vk_shader* shader)
 {
-	u32 image_index = context->swapchain_info.image_counts;
+	u32 image_index = context->image_index;
 	VkCommandBuffer cmdbuffer = context->g_cmd_buffer[image_index].cmdbuffer_handle;
 	VkDescriptorSet global_descriptor = shader->global_descriptor_set[image_index];
 
@@ -1473,7 +1473,7 @@ void vk_shader_update_global_state(vk_context* context, vk_shader* shader)
 		shader->pipeline.pipeline_layout,
 		0,
 		1,
-		shader->global_descriptor_set,
+		&global_descriptor,
 		0,
 		0);
 
