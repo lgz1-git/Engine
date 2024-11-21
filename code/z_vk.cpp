@@ -486,7 +486,7 @@ void vk_create_image(
 	VkMemoryPropertyFlags memory_flags,
 	bool create_view,
 	VkImageAspectFlags view_aspect_flags,
-	vk_depth_image* depth_image)
+	vk_image* depth_image)
 {
 
 	VkImageCreateInfo create_info = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
@@ -548,7 +548,7 @@ void vk_create_image(
 void vk_create_image_view(
 	vk_context* context,
 	VkFormat format,
-	vk_depth_image* image,
+	vk_image* image,
 	VkImageAspectFlags aspect_flag)
 {
 	VkImageViewCreateInfo view_create_info = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO }; 
@@ -563,7 +563,7 @@ void vk_create_image_view(
 	vk_assert(vkCreateImageView(context->device.logical_device, &view_create_info, context->vk_allocator, &image->view));
 }
 
-void vk_destroy_image(vk_context* context, vk_depth_image* image)
+void vk_destroy_image(vk_context* context, vk_image* image)
 {
 	if (image->view) {
 		vkDestroyImageView(context->device.logical_device, image->view, context->vk_allocator);
@@ -574,6 +574,85 @@ void vk_destroy_image(vk_context* context, vk_depth_image* image)
 	if (image->image_handle) {
 		vkDestroyImage(context->device.logical_device, image->image_handle, context->vk_allocator);
 	}
+}
+
+void vk_image_translation_layout(
+	vk_context* context,
+	vk_cmdbuffer* cmdbuf,
+	vk_image* image,
+	VkFormat format,
+	VkImageLayout old_layout,
+	VkImageLayout new_layout)
+{
+	VkImageMemoryBarrier barrier = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
+	barrier.oldLayout = old_layout;
+	barrier.newLayout = new_layout;
+	barrier.image = image->image_handle;
+	barrier.srcQueueFamilyIndex = context->device.queue_family_info.graphics_family_index;
+	barrier.dstQueueFamilyIndex = context->device.queue_family_info.graphics_family_index;
+
+	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	barrier.subresourceRange.baseArrayLayer = 0;
+	barrier.subresourceRange.baseMipLevel = 0;
+	barrier.subresourceRange.layerCount = 1;
+	barrier.subresourceRange.levelCount = 1;
+
+	VkPipelineStageFlags src_stage = {};
+	VkPipelineStageFlags dst_stage = {};
+
+	if (old_layout == VK_IMAGE_LAYOUT_UNDEFINED && new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL){
+
+		barrier.srcAccessMask = 0;
+		barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+		src_stage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+		dst_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+	}
+	else if(old_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL){
+		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+		src_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		dst_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	}
+	else {
+		LERR("unsupport image tranlation layout");
+		return;
+	}
+
+	vkCmdPipelineBarrier(
+		cmdbuf->cmdbuffer_handle,
+		src_stage,
+		dst_stage,
+		0, 0, 0, 0, 0, 1, &barrier);
+}
+
+void vk_image_copy_from_buffer(
+	vk_context* context,
+	vk_cmdbuffer* cmdbuf,
+	VkBuffer buf,
+	vk_image* image)
+{
+	VkBufferImageCopy region = {};
+	region.bufferImageHeight = 0;
+	region.bufferOffset = 0;
+	region.bufferRowLength = 0;
+
+	region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	region.imageSubresource.layerCount = 1;
+	region.imageSubresource.baseArrayLayer = 0;
+	region.imageSubresource.mipLevel = 0;
+
+	region.imageExtent.width = context->extent_w;
+	region.imageExtent.height = context->extent_h;
+	region.imageExtent.depth = 1;
+
+	vkCmdCopyBufferToImage(
+		cmdbuf->cmdbuffer_handle,
+		buf, image->image_handle,
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		1,
+		&region);
 }
 
 //@Param:surface
@@ -1401,10 +1480,20 @@ bool vk_create_g_pipeline(
 	input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 	input_assembly.primitiveRestartEnable = false;
 
+	//@Param:push const
+	VkPushConstantRange constant = {};
+	constant.offset = 0;
+	constant.size = sizeof(mat4)*2;
+	constant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+
 	//@Param:pipeline layout
 	VkPipelineLayoutCreateInfo layout = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
 	layout.setLayoutCount = descriptors_set_layout_counts;
 	layout.pSetLayouts = descriptors_set_layout;
+	
+	layout.pPushConstantRanges = &constant;
+	layout.pushConstantRangeCount = 1;
 
 	vk_assert(vkCreatePipelineLayout(
 		context->device.logical_device,
@@ -1506,6 +1595,20 @@ void vk_shader_update_global_state(vk_context* context, vk_shader* shader)
 		&write,
 		0,
 		0);
+}
+
+void vk_push_const(vk_context* context,vk_shader* shader, glm::mat4 model)
+{
+	u32 image_index = context->image_index;
+	VkCommandBuffer cmdbuffer = context->g_cmd_buffer[image_index].cmdbuffer_handle;
+
+	vkCmdPushConstants(
+		cmdbuffer, 
+		shader->pipeline.pipeline_layout,
+		VK_SHADER_STAGE_VERTEX_BIT, 
+		0, 
+		sizeof(mat4),
+		&model);
 }
 
 //1 @Param:buffer

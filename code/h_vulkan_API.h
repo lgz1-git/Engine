@@ -87,7 +87,7 @@ struct vk_device
 };
 
 
-struct vk_depth_image {
+struct vk_image {
 	VkImage image_handle;
 	VkDeviceMemory memory;
 	VkImageView view;
@@ -130,7 +130,7 @@ struct vk_swapchain_info
 	VkImage* images;
 	VkImageView* views;
 
-	vk_depth_image depth_image;
+	vk_image depth_image;
 };
 
 struct gloabal_uniform_object {
@@ -258,6 +258,7 @@ void vk_destory_cmdpool(vk_context* context);
 
 void vk_create_swapchain(vk_context* context,vk_swapchain_info* swapchain_info,u32 w,u32 h);
 
+//@Param:iamge
 void vk_create_image(
 	vk_context* context,
 	VkImageType image_type,
@@ -269,15 +270,29 @@ void vk_create_image(
 	VkMemoryPropertyFlags memory_flags,
 	bool create_view,
 	VkImageAspectFlags view_aspect_flags,
-	vk_depth_image* image);
+	vk_image* image);
 
 void vk_create_image_view(
 	vk_context* context,
 	VkFormat format,
-	vk_depth_image* image,
+	vk_image* image,
 	VkImageAspectFlags aepect_flag);
 
-void vk_destroy_image(vk_context* context, vk_depth_image* image);
+void vk_image_translation_layout(
+	vk_context* context,
+	vk_cmdbuffer* cmdbuf,
+	vk_image* image,
+	VkFormat format,
+	VkImageLayout old_layout,
+	VkImageLayout new_layout);
+
+void vk_image_copy_from_buffer(
+	vk_context* context,
+	vk_cmdbuffer* cmdbuf,
+	VkBuffer buf,
+	vk_image* image);
+
+void vk_destroy_image(vk_context* context, vk_image* image);
 
 void vk_recreate_swapchain(vk_context* context,vk_swapchain_info* swapchain_info,u32 w,u32 h);
 
@@ -383,6 +398,7 @@ bool vk_create_shader(vk_context* context, vk_shader* shader);
 void vk_destroy_shader(vk_context* context, vk_shader* shader);
 void vk_use_shader(vk_context* context, vk_shader* shader);
 void vk_shader_update_global_state(vk_context* context, vk_shader* shader);
+void vk_push_const(vk_context* context, vk_shader* shader,glm::mat4 model);
 
 
 //1 @Param:graphics pipeline

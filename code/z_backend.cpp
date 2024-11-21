@@ -408,6 +408,7 @@ void bk_vk_update_global_state(
 	context->shader.global_uo.projection = projection;
 	context->shader.global_uo.view = view;
 
+	vk_push_const(context, &context->shader, glm::mat4(1.f));
 	vk_shader_update_global_state(context, &context->shader);
 
 	vk_use_shader(context, &context->shader);

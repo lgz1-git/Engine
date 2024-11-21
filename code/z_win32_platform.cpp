@@ -32,32 +32,30 @@ create_window(win32_platform_context* context, win32_config* config)
 static LRESULT
 CALLBACK WindowProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
-    switch (msg){
+    switch (msg) {
 
-        case WM_CLOSE:{
-        
-            LTRACE("window close");
-            g_running = false;
-               
-        }break;
-        case WM_DESTROY: {
-            LTRACE("window destory");
-        }break;
-        case WM_SIZE: {
-            RECT client_react;
-            GetClientRect(wnd, &client_react);
-            int32_t width = client_react.right - client_react.left;
-            int32_t height = client_react.bottom - client_react.top;
-            g_rect_w = width;
-            g_rect_h = height;
-            LINFO("w: " << g_rect_w);
-            LINFO("h: " << g_rect_h);
-        }break;
-        case WM_SYSKEYUP:
-        case WM_SYSKEYDOWN:
-        case WM_KEYUP:
-        case WM_KEYDOWN:
-    {
+    case WM_CLOSE: {
+        LTRACE("window close");
+        g_running = false;
+
+    }break;
+    case WM_DESTROY: {
+        LTRACE("window destory");
+    }break;
+    case WM_SIZE: {
+        RECT client_react;
+        GetClientRect(wnd, &client_react);
+        int32_t width = client_react.right - client_react.left;
+        int32_t height = client_react.bottom - client_react.top;
+        g_rect_w = width;
+        g_rect_h = height;
+        LINFO("w: " << g_rect_w);
+        LINFO("h: " << g_rect_h);
+    }break;
+    case WM_SYSKEYUP:
+    case WM_SYSKEYDOWN:
+    case WM_KEYUP:
+    case WM_KEYDOWN: {
         u32 vkcode = wparam;
         bool wasdown = ((lparam >> 30 & 1) != 0);
         bool isdown = ((lparam >> 31 & 1) == 0);
@@ -65,51 +63,35 @@ CALLBACK WindowProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
         {
             if (wasdown) {
                 OutputDebugStringA("W: wasdown");
-                /*g_rect_w++;
-                g_rect_h++;*/
             }
             if (isdown)
                 OutputDebugStringA("W: isdown");
         }
-        else if (vkcode == 'S')
-        {
-
+    }break;
+    case WM_MOUSEMOVE: {
+        //i32 xPos = GET_X_LPARAM(lparam);
+        //i32 yPos = GET_Y_LPARAM(lparam);
+        //LTIME(xPos << " " << yPos);
+    }break;
+    case WM_MOUSEWHEEL: {
+        i32 z_delta = GET_WHEEL_DELTA_WPARAM(wparam);
+        if (z_delta != 0) {
+            z_delta = (z_delta < 0) ? -1 : 1;
         }
-        else if (vkcode == 'A')
-        {
-
-        }
-        else if (vkcode == 'D')
-        {
-
-        }
-        else if (vkcode == VK_UP)
-        {
-
-        }
-        else if (vkcode == VK_DOWN)
-        {
-
-        }
-        else if (vkcode == VK_LEFT)
-        {
-
-        }
-        else if (vkcode == VK_RIGHT)
-        {
-
-        }
-        else if (vkcode == VK_ESCAPE)
-        {
-
-        }
+    }break;
+    case WM_LBUTTONDOWN:
+    case WM_MBUTTONDOWN:
+    case WM_RBUTTONDOWN:
+    case WM_LBUTTONUP:
+    case WM_MBUTTONUP:
+    case WM_RBUTTONUP: {
 
     }break;
-        case WM_CHAR: {
+    case WM_CHAR: {
         //todo::input text
 
-        }
-        default:
+    }
+    default:
         return DefWindowProcA(wnd, msg, wparam, lparam);
     }
 }

@@ -29,3 +29,5 @@ void bk_vk_update_global_state(
 bool bk_vk_end_frame(vk_context* context);
 void bk_vk_shutdown(vk_context* context);
 
+
+
