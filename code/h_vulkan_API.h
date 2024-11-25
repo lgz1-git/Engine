@@ -14,10 +14,12 @@
 #include <string_view>
 #include <memory>
 
-#include "glm.hpp"
+#include "h_math.h"
 
 #define vk_assert(p) assert(p==VK_SUCCESS)
 constexpr u32 shader_counts = 2;//TODO:
+constexpr u32 object_descriptor_counts = 2;
+constexpr u32 max_obj_counts = 1024;//TODO:
 
 struct vk_select_queuefamily
 {
@@ -88,6 +90,7 @@ struct vk_device
 
 
 struct vk_image {
+	u32 w, h;
 	VkImage image_handle;
 	VkDeviceMemory memory;
 	VkImageView view;
@@ -134,10 +137,42 @@ struct vk_swapchain_info
 };
 
 struct gloabal_uniform_object {
-	glm::mat4 projection;
-	glm::mat4 view;
+	glm::mat4 projection;//TODO:
+	glm::mat4 view;		 //@Param:256 bytes
 	glm::mat4 temp1;
 	glm::mat4 temp2;
+};
+
+struct object_uniform_object {
+	glm::vec4 diffuse_color;//@Param:64 bytes
+	glm::vec4 temp1;
+	glm::vec4 temp2;
+	glm::vec4 temp3;
+};
+
+struct vk_descriptor_state {
+	u32 generation[3];
+};
+
+struct vk_object_state{
+	VkDescriptorSet descriptor_set[3];
+
+	vk_descriptor_state descriptor_state[object_descriptor_counts];
+};
+
+struct vk_texture {
+	u32 id;
+	u32 w, h;
+	u8 channel_counts;
+	bool has_transparency;
+	u32 generation;
+	void* internal_data;
+};
+
+struct geometry_render_data {
+	u32 object_id;
+	glm::mat4 model;
+	vk_texture* texture[16];
 };
 
 struct vk_fence {
@@ -171,14 +206,28 @@ struct vk_buffer {
 struct vk_shader {
 	vk_shader_stage stages[shader_counts];
 
+	//global uniform
 	VkDescriptorPool global_descriptor_pool;
 	VkDescriptorSetLayout  global_descriptor_set_layout;
-
 	VkDescriptorSet global_descriptor_set[3];
 	gloabal_uniform_object global_uo;
 	vk_buffer global_ubo;
 
+	//object
+	VkDescriptorPool object_descriptor_pool;
+	VkDescriptorSetLayout  object_descriptor_set_layout;
+	vk_buffer object_ubo;
+	u32 object_ubo_index;
+
+	vk_object_state object_state[max_obj_counts];
+
 	vk_pipeline pipeline;
+};
+
+
+struct vk_texture_data {
+	vk_image image;
+	VkSampler sampler;
 };
 
 struct vk_context
@@ -266,7 +315,7 @@ void vk_create_image(
 	u32 h,
 	VkFormat format,
 	VkImageTiling tiling,
-	VkImageUsageFlagBits usage,
+	VkImageUsageFlags usage,
 	VkMemoryPropertyFlags memory_flags,
 	bool create_view,
 	VkImageAspectFlags view_aspect_flags,
@@ -398,7 +447,8 @@ bool vk_create_shader(vk_context* context, vk_shader* shader);
 void vk_destroy_shader(vk_context* context, vk_shader* shader);
 void vk_use_shader(vk_context* context, vk_shader* shader);
 void vk_shader_update_global_state(vk_context* context, vk_shader* shader);
-void vk_push_const(vk_context* context, vk_shader* shader,glm::mat4 model);
+bool vk_shader_acquire_resource(vk_context* context, vk_shader* shader, u32* object_id);
+void vk_shader_release_resource(vk_context* context, vk_shader* shader, u32 object_id);
 
 
 //1 @Param:graphics pipeline

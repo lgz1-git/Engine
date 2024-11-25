@@ -1,5 +1,5 @@
 #include "h_win32_platform.h"
-
+#include "h_inputs.h"
 #include "h_global_list.h"
 
 void 
@@ -56,28 +56,23 @@ CALLBACK WindowProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
     case WM_SYSKEYDOWN:
     case WM_KEYUP:
     case WM_KEYDOWN: {
-        u32 vkcode = wparam;
-        bool wasdown = ((lparam >> 30 & 1) != 0);
-        bool isdown = ((lparam >> 31 & 1) == 0);
-        if (vkcode == 'W')
-        {
-            if (wasdown) {
-                OutputDebugStringA("W: wasdown");
-            }
-            if (isdown)
-                OutputDebugStringA("W: isdown");
-        }
+            
+        bool pressed = (msg == WM_SYSKEYDOWN || msg == WM_KEYDOWN);
+        keys key = (keys)wparam;
+        input_process_key(key, pressed);
+        
     }break;
     case WM_MOUSEMOVE: {
-        //i32 xPos = GET_X_LPARAM(lparam);
-        //i32 yPos = GET_Y_LPARAM(lparam);
-        //LTIME(xPos << " " << yPos);
+        i32 xPos = GET_X_LPARAM(lparam);
+        i32 yPos = GET_Y_LPARAM(lparam);
+        input_process_mouse_move(xPos, yPos);
     }break;
     case WM_MOUSEWHEEL: {
         i32 z_delta = GET_WHEEL_DELTA_WPARAM(wparam);
         if (z_delta != 0) {
             z_delta = (z_delta < 0) ? -1 : 1;
         }
+        input_process_mouse_wheel(z_delta);
     }break;
     case WM_LBUTTONDOWN:
     case WM_MBUTTONDOWN:
@@ -85,7 +80,26 @@ CALLBACK WindowProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
     case WM_LBUTTONUP:
     case WM_MBUTTONUP:
     case WM_RBUTTONUP: {
-
+        bool pressed = msg == WM_LBUTTONDOWN || WM_MBUTTONDOWN || WM_RBUTTONDOWN;
+        buttons button = BUTTON_MAX_BUTTON_COUNTS;
+        switch (msg)
+        {
+        case WM_LBUTTONDOWN:
+        case WM_LBUTTONUP: {
+            button = BUTTON_LEFT;
+        }break;
+        case WM_MBUTTONDOWN:
+        case WM_MBUTTONUP: {
+            button = BUTTON_MIDDLE;
+        }break;
+        case WM_RBUTTONDOWN:
+        case WM_RBUTTONUP: {
+            button = BUTTON_RIGHT;
+        }break;
+        }
+        if (button != BUTTON_MAX_BUTTON_COUNTS) {
+            input_process_button(button, pressed);
+        }
     }break;
     case WM_CHAR: {
         //todo::input text

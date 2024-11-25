@@ -30,9 +30,6 @@
     <ClCompile Include="code\z_clock.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="code\z_renderer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="code\z_backend.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -45,6 +42,12 @@
     <ClCompile Include="code\z_filesystem.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="code\z_events.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="code\z_input.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code\h_windows.h">
@@ -54,9 +57,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="code\h_type.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="code\h_renderer.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="code\h_clock.h">
@@ -78,6 +78,21 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="code\h_math.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="code\h_texture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="code\h_inputs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Dep\h_stb_image.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="code\h_events.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="code\h_virtual_keycode.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

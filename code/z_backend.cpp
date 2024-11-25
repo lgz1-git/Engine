@@ -67,8 +67,7 @@ static void bk_vk_upload_data_range(
 }
 
 
-void 
-bk_win32_init(win32_platform_context* context)
+void bk_win32_init(win32_platform_context* context)
 {
 	win32_config config = {};//todo:: config , no local varible
 	config.win_classname = "class name";
@@ -81,8 +80,7 @@ bk_win32_init(win32_platform_context* context)
 	ShowWindow(context->win_handle, SW_SHOW);
 }
 
-void
-bk_win32_get_size()
+void bk_win32_get_size()
 {
 	RECT client_react;
 	GetClientRect(g_context.win32_context.win_handle, &client_react);
@@ -92,8 +90,7 @@ bk_win32_get_size()
 	g_rect_h = height;
 }
 
-void
-bk_vk_resize(vk_context* context)
+void bk_vk_resize(vk_context* context)
 {
 	vk_assert(vkDeviceWaitIdle(context->device.logical_device));
 	vk_recreate_swapchain(context, &context->swapchain_info, context->extent_w, context->extent_h);
@@ -121,7 +118,6 @@ bk_vk_resize(vk_context* context)
 
 	context->resize = false;
 }
-
 
 bool bk_vk_create_buffer(vk_context* context)
 {
@@ -156,19 +152,18 @@ bool bk_vk_create_buffer(vk_context* context)
 	return true;
 }
 
-void 
-bk_vk_init(vk_context* context , win32_platform_context* win32_context)
+void bk_vk_init(vk_context* context, win32_platform_context* win32_context)
 {
 	//info
 	vk_init_extensions(context);
 	vk_create_instance(context);
-	vk_create_surface(context , win32_context);
+	vk_create_surface(context, win32_context);
 	bool result = vk_select_pdevice(context);
 	if (result) {
 		LTRACE("phisical device is suitable!");
 	}
-	vk_create_device(context );
-	vk_create_swapchain(context , &context->swapchain_info, g_rect_w, g_rect_h);
+	vk_create_device(context);
+	vk_create_swapchain(context, &context->swapchain_info, g_rect_w, g_rect_h);
 
 	vk_create_renderpass(
 		context,
@@ -176,7 +171,7 @@ bk_vk_init(vk_context* context , win32_platform_context* win32_context)
 		0.f, 0.f, 0.2f, 1.0f,
 		1.f,
 		0);
-	
+
 	//@Param:cmdbuffer
 	bk_vk_create_cmdbuffer(context);
 	//@Param:framebuffer
@@ -184,29 +179,29 @@ bk_vk_init(vk_context* context , win32_platform_context* win32_context)
 
 	////info::sync
 	context->image_available_semphores = (VkSemaphore*)malloc(context->swapchain_info.max_frames_in_flight * sizeof(VkSemaphore));
-	context->queue_complete_semphores  = (VkSemaphore*)malloc(context->swapchain_info.max_frames_in_flight * sizeof(VkSemaphore));
-	context->in_flight_fence           = (vk_fence*)malloc(context->swapchain_info.max_frames_in_flight * sizeof(vk_fence));
+	context->queue_complete_semphores = (VkSemaphore*)malloc(context->swapchain_info.max_frames_in_flight * sizeof(VkSemaphore));
+	context->in_flight_fence = (vk_fence*)malloc(context->swapchain_info.max_frames_in_flight * sizeof(vk_fence));
 
-	for (i32 i = 0; i < context-> swapchain_info.max_frames_in_flight; i++) {
+	for (i32 i = 0; i < context->swapchain_info.max_frames_in_flight; i++) {
 		VkSemaphoreCreateInfo create_info = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
 		vkCreateSemaphore(
-			context-> device.logical_device,
+			context->device.logical_device,
 			&create_info,
-			context-> vk_allocator,
+			context->vk_allocator,
 			&context->image_available_semphores[i]);
 		vkCreateSemaphore(
-			context-> device.logical_device,
+			context->device.logical_device,
 			&create_info,
-			context-> vk_allocator,
+			context->vk_allocator,
 			&context->queue_complete_semphores[i]);
 
-		vk_create_fence( context, true,  &context->in_flight_fence[i]);
+		vk_create_fence(context, true, &context->in_flight_fence[i]);
 	}
 	LTRACE("sync object is created!");
 
 	context->images_in_flight = (vk_fence**)malloc(context->swapchain_info.image_counts * sizeof(vk_fence*));
 	for (i32 i = 0; i < context->swapchain_info.image_counts; i++) {
-		context-> images_in_flight[i] = 0;
+		context->images_in_flight[i] = 0;
 	}
 
 	//@Param:create shader
@@ -222,20 +217,21 @@ bk_vk_init(vk_context* context , win32_platform_context* win32_context)
 	const u32 vert_count = 4;
 	vert_3D verts[vert_count] = {};
 
-	verts[0].position.x =  (f32)0.0;
-	verts[0].position.y = (f32)(0.0);
+	verts[0].position = { -0.5 ,-0.5 ,0.0 };
+	verts[0].texcoord = {0.f , 0.f};
 
-	verts[1].position.x = (f32)0.5;
-	verts[1].position.y = (f32)(0.5);
+	verts[1].position = { 0.5,0.5,0.0 };
+	verts[1].texcoord = {1 ,1};
 
-	verts[2].position.x = (f32)0.0;
-	verts[2].position.y = (f32)(0.5);
+	verts[2].position = {-0.5, 0.5, 0.0};
+	verts[2].texcoord = {0,1};
 
-	verts[3].position.x = -0.5f;
-	verts[3].position.y = (0.5);
+	verts[3].position = { 0.5, -0.5 ,0.0 };
+	verts[3].texcoord = {1,0};
+
 
 	const u32 index_counts = 6;
-	u32 index[index_counts] = {0,1,2,0,2,3};
+	u32 index[index_counts] = {0,1,2,0,3,1};
 
 	bk_vk_upload_data_range(
 		context,
@@ -255,12 +251,14 @@ bk_vk_init(vk_context* context , win32_platform_context* win32_context)
 		0,
 		sizeof(u32) * index_counts,
 		index);
+
+	u32 obj_id = 0;
+	if (!vk_shader_acquire_resource(context, &context->shader, &obj_id)) {
+		LERR("failed to acquire resource");
+	}
  }
 
-
-
-void 
-bk_vk_shutdown(vk_context* context)
+void bk_vk_shutdown(vk_context* context)
 {
 	vkDeviceWaitIdle(context-> device.logical_device);
 
@@ -310,8 +308,7 @@ bk_vk_shutdown(vk_context* context)
 	vk_destroy_instance( context);
 }
 
-bool
-bk_vk_begin_frame(vk_context* context)
+bool bk_vk_begin_frame(vk_context* context)
 {
 	if (g_rect_w == context->extent_w && g_rect_h == context->extent_h) {
 		context->resize = false;
@@ -404,11 +401,10 @@ void bk_vk_update_global_state(
 {
 	vk_cmdbuffer* cmdbuffer = &context->g_cmd_buffer[context->image_index];
 
-	vk_use_shader(context, &context->shader);
+	//vk_use_shader(context, &context->shader);
 	context->shader.global_uo.projection = projection;
 	context->shader.global_uo.view = view;
 
-	vk_push_const(context, &context->shader, glm::mat4(1.f));
 	vk_shader_update_global_state(context, &context->shader);
 
 	vk_use_shader(context, &context->shader);
@@ -417,6 +413,209 @@ void bk_vk_update_global_state(
 	vkCmdBindIndexBuffer(cmdbuffer->cmdbuffer_handle, context->index_buffer.handle, 0, VK_INDEX_TYPE_UINT32);
 
 	vkCmdDrawIndexed(cmdbuffer->cmdbuffer_handle, 6, 1, 0, 0, 0);
+}
+
+void bk_vk_update_object_state(vk_context* context, vk_shader* shader, geometry_render_data data)
+{
+	u32 image_index = context->image_index;
+	VkCommandBuffer cmdbuffer = context->g_cmd_buffer[image_index].cmdbuffer_handle;
+
+	vkCmdPushConstants(
+		cmdbuffer,
+		shader->pipeline.pipeline_layout,
+		VK_SHADER_STAGE_VERTEX_BIT,
+		0,
+		sizeof(mat4),
+		&data.model);
+
+	vk_object_state* object_state = &shader->object_state[data.object_id];
+	VkDescriptorSet obj_descriptor_set = object_state->descriptor_set[image_index];
+
+	VkWriteDescriptorSet dsecriptor_write[object_descriptor_counts];
+	u32 descriptor_counts = 0;
+	u32 descriptor_index = 0;
+
+	u32 range = sizeof(object_uniform_object);
+	u32 offest = sizeof(object_uniform_object) * data.object_id;
+	object_uniform_object ouo;
+
+	static f32 accumulator = 0.f;
+	accumulator += 0.001f;
+	f32 s = (sin(accumulator) + 1) / 2;
+	ouo.diffuse_color = glm::vec4(s, s, s, 1.f);
+
+	vk_buffer_load_data(context, &shader->object_ubo, offest, range, 0, &ouo);
+	if (object_state->descriptor_state[descriptor_index].generation[image_index] == UINT32_MAX)
+	{
+		VkDescriptorBufferInfo buf_info = {};
+		buf_info.buffer = shader->object_ubo.handle;
+		buf_info.range = range;
+		buf_info.offset = offest;
+
+		VkWriteDescriptorSet write_descriptor_set = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+		write_descriptor_set.descriptorCount = 1;
+		write_descriptor_set.dstSet = obj_descriptor_set;
+		write_descriptor_set.dstBinding = descriptor_index;
+		write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		write_descriptor_set.pBufferInfo = &buf_info;
+
+		dsecriptor_write[descriptor_counts] = write_descriptor_set;
+		descriptor_counts++;
+
+		object_state->descriptor_state[descriptor_index].generation[image_index] = 1;
+	}
+	descriptor_index++;
+
+	//@Param:sampler
+	const u32 sampler_counts = 1;
+	VkDescriptorImageInfo image_info[sampler_counts];
+	for (i32 sampler_index = 0; sampler_index < sampler_counts; sampler_index++)
+	{
+		vk_texture* t = data.texture[sampler_index];
+		u32* descriptor_generation = &object_state->descriptor_state[descriptor_index].generation[image_index];
+
+		if (t && (*descriptor_generation != t->generation || *descriptor_generation == UINT32_MAX)) {
+			vk_texture_data* t_data = (vk_texture_data*)t->internal_data;
+
+			image_info[sampler_index].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			image_info[sampler_index].imageView = t_data->image.view;
+			image_info[sampler_index].sampler = t_data->sampler;
+
+			VkWriteDescriptorSet write_set = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+			write_set.dstSet = obj_descriptor_set;
+			write_set.dstBinding = descriptor_index;
+			write_set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			write_set.descriptorCount = 1;
+			write_set.pImageInfo = &image_info[sampler_index];
+
+			dsecriptor_write[descriptor_counts] = write_set;
+			descriptor_counts++;
+
+			if (t->generation != UINT32_MAX) {
+				*descriptor_generation = t->generation;
+			}
+			descriptor_index++;
+		}
+	}
+
+	if (descriptor_counts > 0) {
+		vkUpdateDescriptorSets(context->device.logical_device, descriptor_counts, dsecriptor_write, 0, 0);
+	}
+	vkCmdBindDescriptorSets(
+		cmdbuffer,
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		shader->pipeline.pipeline_layout,
+		1, 1, &obj_descriptor_set,
+		0, 0);
+}
+
+
+void bk_vk_create_texture(
+	vk_context* context,
+	const char* name,
+	bool auto_release,
+	i32 w,
+	i32 h,
+	i32 channel_counts,
+	const u8* pixels,
+	bool has_transparency,
+	vk_texture* texture)
+{
+	texture->channel_counts = channel_counts;
+	texture->generation = UINT32_MAX;
+	texture->w = w;
+	texture->h = h;
+
+	texture->internal_data = (vk_texture_data*)malloc(sizeof(vk_texture_data));//TODO:malloc
+	vk_texture_data* data = (vk_texture_data*)texture->internal_data;
+	VkDeviceSize image_size = (VkDeviceSize)(w) * h * channel_counts;
+
+	VkFormat image_format = VK_FORMAT_R8G8B8A8_UNORM;
+
+	VkBufferUsageFlags usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+	VkMemoryPropertyFlags  mem_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+	vk_buffer stageing = {};
+	vk_create_buffer(context, image_size, usage, mem_flags, true, &stageing);
+
+	vk_buffer_load_data(context, &stageing, 0, image_size, 0, pixels);
+
+	vk_create_image(
+		context,
+		VK_IMAGE_TYPE_2D,
+		w, h,
+		image_format,
+		VK_IMAGE_TILING_OPTIMAL,
+		VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+		VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		true,
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		&data->image);
+
+	vk_cmdbuffer cmdbuf = {};
+	VkCommandPool cmdpool = context->device.g_cmdpool;
+	VkQueue queue = context->device.graphics_queue;
+	vk_cmdbuffer_allocate_and_begin_single_use(context, cmdpool, &cmdbuf);
+
+	vk_image_translation_layout(
+		context,
+		&cmdbuf,
+		&data->image,
+		image_format,
+		VK_IMAGE_LAYOUT_UNDEFINED,
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+
+	vk_image_copy_from_buffer(
+		context,
+		&cmdbuf,
+		stageing.handle,
+		&data->image);
+
+	vk_image_translation_layout(
+		context,
+		&cmdbuf,
+		&data->image,
+		image_format,
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+	vk_cmdbuffer_free_and_end_single_use(context, cmdpool, &cmdbuf, queue);
+	vk_destroy_buffer(context, &stageing);
+
+	VkSamplerCreateInfo sampler_create_info = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
+	sampler_create_info.minFilter = VK_FILTER_LINEAR;
+	sampler_create_info.magFilter = VK_FILTER_LINEAR;
+	sampler_create_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	sampler_create_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	sampler_create_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	sampler_create_info.anisotropyEnable = true;
+	sampler_create_info.maxAnisotropy = 16;
+	sampler_create_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+	sampler_create_info.unnormalizedCoordinates = false;
+	sampler_create_info.compareEnable = false;
+	sampler_create_info.compareOp = VK_COMPARE_OP_ALWAYS;
+	sampler_create_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	sampler_create_info.minLod = 0.f;
+	sampler_create_info.maxLod = 0.f;
+	sampler_create_info.mipLodBias = 0.f;
+
+	vk_assert(vkCreateSampler(
+		context->device.logical_device,
+		&sampler_create_info,
+		context->vk_allocator,
+		&data->sampler));
+
+	texture->has_transparency = has_transparency;
+	texture->generation++;
+}
+void bk_vk_destory_texture(vk_context* context , vk_texture* texture)
+{
+	vkDeviceWaitIdle(context->device.logical_device);
+
+	vk_texture_data* data = (vk_texture_data*)texture->internal_data;
+	vk_destroy_image(context, &data->image);
+	vkDestroySampler(context->device.logical_device, data->sampler, context->vk_allocator);
 }
 
 bool 

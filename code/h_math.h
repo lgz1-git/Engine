@@ -1,4 +1,5 @@
 #pragma once
+#include "glm.hpp"
 #include "h_type.h"
 
 constexpr auto PI = 3.14159265358979323846f;
@@ -68,7 +69,8 @@ struct mat4 {
 };
 
 struct vert_3D {
-	vec3 position;
+	glm::vec3 position;
+	glm::vec2 texcoord;
 };
 
 
@@ -80,3 +82,4 @@ namespace vkm {
 	f32 sqrt(f32 x);
 	f32 abs(f32 x);
 };
+

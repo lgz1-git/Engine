@@ -482,7 +482,7 @@ void vk_create_image(
 	u32 h,
 	VkFormat format,
 	VkImageTiling tiling,
-	VkImageUsageFlagBits usage,
+	VkImageUsageFlags usage,
 	VkMemoryPropertyFlags memory_flags,
 	bool create_view,
 	VkImageAspectFlags view_aspect_flags,
@@ -543,6 +543,8 @@ void vk_create_image(
 		vk_create_image_view(context, format, depth_image, view_aspect_flags);
 	}
 
+	depth_image->w = w;
+	depth_image->h = h;
 }
 
 void vk_create_image_view(
@@ -643,8 +645,8 @@ void vk_image_copy_from_buffer(
 	region.imageSubresource.baseArrayLayer = 0;
 	region.imageSubresource.mipLevel = 0;
 
-	region.imageExtent.width = context->extent_w;
-	region.imageExtent.height = context->extent_h;
+	region.imageExtent.width = image->w;
+	region.imageExtent.height = image->h;
 	region.imageExtent.depth = 1;
 
 	vkCmdCopyBufferToImage(
@@ -1225,7 +1227,7 @@ bool vk_create_shader(vk_context* context, vk_shader* shader)
 	char stage_type_str[shader_counts][5] = { "vert" , "frag" };
 	VkShaderStageFlagBits stage_type[shader_counts] = { VK_SHADER_STAGE_VERTEX_BIT,VK_SHADER_STAGE_FRAGMENT_BIT };
 	for (i32 i = 0; i < shader_counts; i++) {
-		if (!vk_create_shader_module(context, BUILTIN_SHADER_NAME_OBJECT, stage_type_str[i], stage_type[i], i,shader->stages)) {
+		if (!vk_create_shader_module(context, BUILTIN_SHADER_NAME_OBJECT, stage_type_str[i], stage_type[i], i, shader->stages)) {
 			LERR("can not create shader for: " << stage_type_str[i] << BUILTIN_SHADER_NAME_OBJECT);
 			return false;
 		}
@@ -1241,14 +1243,13 @@ bool vk_create_shader(vk_context* context, vk_shader* shader)
 	VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
 	descriptor_set_layout_create_info.bindingCount = 1;
 	descriptor_set_layout_create_info.pBindings = &guo_layout_bind;
-
 	vk_assert(vkCreateDescriptorSetLayout(
 		context->device.logical_device,
 		&descriptor_set_layout_create_info,
 		context->vk_allocator,
 		&shader->global_descriptor_set_layout));
 
-	VkDescriptorPoolSize pool_size;
+	VkDescriptorPoolSize pool_size = {};
 	pool_size.descriptorCount = context->swapchain_info.image_counts;
 	pool_size.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 
@@ -1256,14 +1257,48 @@ bool vk_create_shader(vk_context* context, vk_shader* shader)
 	pool_create_info.maxSets = context->swapchain_info.image_counts;
 	pool_create_info.poolSizeCount = 1;
 	pool_create_info.pPoolSizes = &pool_size;
-
 	vk_assert(vkCreateDescriptorPool(
 		context->device.logical_device,
 		&pool_create_info,
 		context->vk_allocator,
 		&shader->global_descriptor_pool));
 
+	//@Param:local uniform
+	const u32 local_sampler_counts = 1;
+	VkDescriptorType descriptor_type[object_descriptor_counts] = {
+		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER ,				//binding 0 uniform 
+		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER		//bindinf 1 diffuse sampler 
+	};
+	VkDescriptorSetLayoutBinding binding[object_descriptor_counts] = {};
+	for (u32 i = 0; i < object_descriptor_counts; i++)
+	{
+		binding[i].binding = i;
+		binding[i].descriptorCount = 1;
+		binding[i].descriptorType = descriptor_type[i];
+		binding[i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	}
+	VkDescriptorSetLayoutCreateInfo layout_create_info = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
+	layout_create_info.bindingCount = object_descriptor_counts;
+	layout_create_info.pBindings = binding;
+	vk_assert(vkCreateDescriptorSetLayout(
+		context->device.logical_device, 
+		&layout_create_info,
+		context->vk_allocator, 
+		&shader->object_descriptor_set_layout));
+	
+	VkDescriptorPoolSize object_pool_size[2];
+	object_pool_size[0].descriptorCount = max_obj_counts;
+	object_pool_size[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 
+	object_pool_size[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	object_pool_size[1].descriptorCount = local_sampler_counts*max_obj_counts;		
+
+	VkDescriptorPoolCreateInfo obj_pool_create_info = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
+	obj_pool_create_info.poolSizeCount = 2;
+	obj_pool_create_info.pPoolSizes = object_pool_size;
+	obj_pool_create_info.maxSets = max_obj_counts;
+
+	vkCreateDescriptorPool(context->device.logical_device, &obj_pool_create_info, context->vk_allocator, &shader->object_descriptor_pool);
 	//@Param:pipeline
 	VkViewport view = {};
 	view.x = 0.f;
@@ -1277,14 +1312,20 @@ bool vk_create_shader(vk_context* context, vk_shader* shader)
 	scissor.offset = { 0,0 };
 	scissor.extent = { context->extent_w ,context->extent_h };
 
+	//@Param:attribute
 	u32 offest = 0;
-	const i32 attribute_count = 1;
+	const i32 attribute_count = 2;
 	VkVertexInputAttributeDescription attribute_description[attribute_count];
 
 	VkFormat format[attribute_count] = {
 		VK_FORMAT_R32G32B32_SFLOAT,
+		VK_FORMAT_R32G32_SFLOAT
 	};
-	size_t size[attribute_count] = { 3 * sizeof(f32) };
+	//@Param:position , texcoord
+	size_t size[attribute_count] = {
+		sizeof(glm::vec3),
+		sizeof(glm::vec2) 
+	};
 	for (i32 i = 0; i < attribute_count; i++) {
 		attribute_description[i].offset = offest;
 		attribute_description[i].format = format[i];
@@ -1293,9 +1334,13 @@ bool vk_create_shader(vk_context* context, vk_shader* shader)
 		offest += size[i];
 	}
 
+
 	//TODO:descriptor set layout
-	const u32 descriptor_set_layout_counts = 1;
-	VkDescriptorSetLayout descriptor_set_layout[1] = { shader->global_descriptor_set_layout };
+	const u32 descriptor_set_layout_counts = 2;
+	VkDescriptorSetLayout descriptor_set_layout[2] = {
+		shader->global_descriptor_set_layout ,
+		shader->object_descriptor_set_layout
+	};
 
 	//@Param:pipeline shader stages
 	VkPipelineShaderStageCreateInfo stage_create_info[shader_counts]; 
@@ -1330,7 +1375,7 @@ bool vk_create_shader(vk_context* context, vk_shader* shader)
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 		true,
 		&shader->global_ubo)) {
-		LERR("fail to create uniform buffer!");
+		LERR("fail to create global uniform buffer!");
 		return false;
 	}
 
@@ -1342,7 +1387,6 @@ bool vk_create_shader(vk_context* context, vk_shader* shader)
 
 	VkDescriptorSetAllocateInfo alloc_info = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
 	alloc_info.descriptorPool = shader->global_descriptor_pool;
-	alloc_info.descriptorSetCount = 1;
 	alloc_info.descriptorSetCount = 3;
 	alloc_info.pSetLayouts = layout;
 
@@ -1351,6 +1395,17 @@ bool vk_create_shader(vk_context* context, vk_shader* shader)
 		&alloc_info,
 		shader->global_descriptor_set));
 
+	if (!vk_create_buffer(
+		context,
+		sizeof(object_uniform_object),
+		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		true,
+		&shader->object_ubo)) {
+		LERR("fail to create object uniform buffer!");
+		return false;
+	}
+
 	return true;
 }
 void vk_destroy_shader(vk_context* context, vk_shader* shader)
@@ -1358,10 +1413,19 @@ void vk_destroy_shader(vk_context* context, vk_shader* shader)
 	VkDevice device = context->device.logical_device;
 
 	//@Param:destroy uniform buffer
+	vk_destroy_buffer(context, &shader->object_ubo);
+
+	//@Param:destroy uniform buffer
 	vk_destroy_buffer(context, &shader->global_ubo);
 
 	//@Param:destroy pipeline
 	vk_destroy_pipeline(context, &shader->pipeline);
+
+	//@Param:destroy descriptor pool
+	vkDestroyDescriptorPool(device, shader->object_descriptor_pool, context->vk_allocator);
+
+	//@Param:destroy descriptor set layout
+	vkDestroyDescriptorSetLayout(device, shader->object_descriptor_set_layout, context->vk_allocator);
 
 	//@Param:destroy descriptor pool
 	vkDestroyDescriptorPool(device, shader->global_descriptor_pool, context->vk_allocator);
@@ -1597,18 +1661,54 @@ void vk_shader_update_global_state(vk_context* context, vk_shader* shader)
 		0);
 }
 
-void vk_push_const(vk_context* context,vk_shader* shader, glm::mat4 model)
-{
-	u32 image_index = context->image_index;
-	VkCommandBuffer cmdbuffer = context->g_cmd_buffer[image_index].cmdbuffer_handle;
 
-	vkCmdPushConstants(
-		cmdbuffer, 
-		shader->pipeline.pipeline_layout,
-		VK_SHADER_STAGE_VERTEX_BIT, 
-		0, 
-		sizeof(mat4),
-		&model);
+bool vk_shader_acquire_resource(vk_context* context, vk_shader* shader, u32* object_id)
+{
+	*object_id = shader->object_ubo_index;
+	shader->object_ubo_index++;
+
+	u32 id = *object_id;
+	vk_object_state* state = &shader->object_state[id];
+	for (i32 i = 0; i < object_descriptor_counts; i++) {
+		for (i32 j = 0; j < 3; j++) {
+			state->descriptor_state[i].generation[j] = UINT32_MAX;
+		}
+	}
+	VkDescriptorSetLayout layout[3] = {
+		shader->object_descriptor_set_layout,
+		shader->object_descriptor_set_layout,
+		shader->object_descriptor_set_layout
+	};
+
+	VkDescriptorSetAllocateInfo alloc_info = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
+	alloc_info.descriptorPool = shader->object_descriptor_pool;
+	alloc_info.descriptorSetCount = 3;
+	alloc_info.pSetLayouts = layout;
+
+	vk_assert(vkAllocateDescriptorSets(
+		context->device.logical_device,
+		&alloc_info,
+		state->descriptor_set));
+
+	return true;
+}
+
+void vk_shader_release_resource(vk_context* context, vk_shader* shader, u32 object_id)
+{
+	vk_object_state* state = &shader->object_state[object_id];
+
+	const u32 descriptor_set_counts = 3;
+	vkFreeDescriptorSets(
+		context->device.logical_device, 
+		shader->global_descriptor_pool, 
+		descriptor_set_counts, 
+		state->descriptor_set);
+
+	for (i32 i = 0; i < max_obj_counts; i++) {
+		for (i32 j = 0; j < 3; j++) {
+			state->descriptor_state[i].generation[j] = UINT32_MAX;
+		}
+	}
 }
 
 //1 @Param:buffer

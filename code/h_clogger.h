@@ -9,6 +9,7 @@
 																__FILE__<<" "<<__func__<<" "<<__LINE__<<": "<<\
 																stream << "\033[0m" << std::endl;
 
+#define LWARN(stream)    std::cout << "\033[1;45m"  <<"[WARN ]: "<< stream << "\033[0m" << std::endl;
 
 
 
